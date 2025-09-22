@@ -18,6 +18,9 @@ class DebugOverlay:
         self.font = None
         self.small_font = None
         
+        # Clock for FPS calculation (will be set by game)
+        self.clock = None
+        
         # Debug panels
         self.panels = {}
         self.panel_positions = {
@@ -31,7 +34,22 @@ class DebugOverlay:
         # Panel visibility
         self.visible_panels = set(['logs'])  # Only logs visible by default
         
+        # Runtime toggle tracking
+        self.was_enabled = self.enabled
+        
         self._initialize_fonts()
+    
+    def update_debug_mode(self):
+        """Update debug mode state from config"""
+        self.enabled = self.config.debug_mode
+        
+        # If debug mode was just enabled, show a notification
+        if self.enabled and not self.was_enabled:
+            self.logger.info("Debug mode enabled - Press 1-5 to toggle panels, F12 to disable", "DEBUG")
+        elif not self.enabled and self.was_enabled:
+            self.logger.info("Debug mode disabled", "DEBUG")
+        
+        self.was_enabled = self.enabled
     
     def _initialize_fonts(self):
         """Initialize debug fonts"""
@@ -258,7 +276,13 @@ class DebugOverlay:
     def _render_fps_counter(self, screen):
         """Render FPS counter in top-right corner"""
         try:
-            fps = pygame.time.Clock().get_fps()
+            # Use the game's clock if available, otherwise fall back to a default value
+            if self.clock:
+                fps = self.clock.get_fps()
+            else:
+                # If no clock is set, show a warning
+                fps = 0
+                
             fps_text = f"FPS: {fps:.1f}"
             
             # Color code FPS
@@ -267,6 +291,8 @@ class DebugOverlay:
                 color = (255, 0, 0)  # Red
             elif fps < 25:
                 color = (255, 255, 0)  # Yellow
+            elif fps == 0:
+                color = (128, 128, 128)  # Gray for no data
             
             surf = self.font.render(fps_text, True, color)
             x = screen.get_width() - surf.get_width() - 10

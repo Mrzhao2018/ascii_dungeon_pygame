@@ -75,6 +75,30 @@ class GameConfig:
             self.config_file.create_default_config()
             print(f"Created default configuration file: {config_path}")
     
+    def toggle_debug_mode(self):
+        """Toggle debug mode at runtime"""
+        self.debug_mode = not self.debug_mode
+        
+        # Update related settings when debug mode changes
+        if self.debug_mode:
+            self.performance_monitoring = True
+            self.show_fps = True
+        
+        # Save the new debug mode setting
+        if self.config_file:
+            try:
+                self.config_file.set('game.debug', self.debug_mode)
+                self.config_file.save()
+            except Exception as e:
+                # Silently fail if unable to save
+                pass
+        
+        return self.debug_mode
+    
+    def get_debug_status(self) -> str:
+        """Get current debug mode status as a formatted string"""
+        return f"Debug Mode: {'ON' if self.debug_mode else 'OFF'}"
+    
     def _save_config_if_requested(self):
         """Save current configuration to file if requested"""
         if '--save-config' in sys.argv and self.config_file:
@@ -242,6 +266,8 @@ PyGame 字符地牢探索游戏 - 命令行参数
   E/回车                  交互
   Tab                     显示出口指示器
   K                       调试信息
+  F12                     切换调试模式
+  1-5                     切换调试面板 (调试模式下)
   Esc                     退出
 """
         print(help_text)

@@ -89,10 +89,29 @@ class InputHandler:
             result['sprint_sound'] = True
             return result
         
-        # Debug key (K)
+        # Debug key (K) - for debug actions
         if event.key == pygame.K_k:
             result['debug'] = True
             return result
+        
+        # Toggle debug mode (F12)
+        if event.key == pygame.K_F12:
+            result['toggle_debug_mode'] = True
+            return result
+        
+        # Debug panel toggles (when debug mode is active)
+        if self.config.debug_mode:
+            debug_panel_keys = {
+                pygame.K_1: 'performance',
+                pygame.K_2: 'game_state',
+                pygame.K_3: 'player_state', 
+                pygame.K_4: 'entity_debug',
+                pygame.K_5: 'logs'
+            }
+            
+            if event.key in debug_panel_keys:
+                result['toggle_debug_panel'] = debug_panel_keys[event.key]
+                return result
         
         return result
     

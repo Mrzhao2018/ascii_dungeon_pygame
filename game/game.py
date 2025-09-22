@@ -75,6 +75,10 @@ class Game:
             self.clock = pygame.time.Clock()
             self.running = True
             
+            # Set clock for debug overlay FPS calculation
+            if self.renderer and hasattr(self.renderer, 'set_debug_clock'):
+                self.renderer.set_debug_clock(self.clock)
+            
             # Entity and interaction state
             self.entity_mgr = None
             self.npcs = {}
@@ -220,6 +224,14 @@ class Game:
     
     def _process_input_results(self, input_results, dt):
         """Process discrete input events"""
+        # Handle debug mode toggle
+        if input_results.get('toggle_debug_mode'):
+            self._handle_debug_mode_toggle()
+        
+        # Handle debug panel toggle
+        if input_results.get('toggle_debug_panel'):
+            self._handle_debug_panel_toggle(input_results.get('toggle_debug_panel'))
+        
         # Handle interaction
         if input_results.get('interaction'):
             self._handle_interaction()
@@ -497,3 +509,39 @@ class Game:
                 f"Performance issue detected: average frame time {frame_stats['avg']:.1f}ms", 
                 "PERFORMANCE"
             )
+    
+    def _handle_debug_mode_toggle(self):
+        """Handle F12 debug mode toggle"""
+        try:
+            new_state = self.config.toggle_debug_mode()
+            
+            # Update debug overlay
+            if hasattr(self.renderer, 'debug_overlay'):
+                self.renderer.debug_overlay.update_debug_mode()
+            
+            # Update logger debug mode
+            self.logger.debug_enabled = new_state
+            
+            # Log the state change
+            status_message = f"Debug mode {'enabled' if new_state else 'disabled'}"
+            if new_state:
+                self.logger.info(f"{status_message} - Press 1-5 to toggle panels, F12 to disable", "DEBUG")
+                self.game_state.game_log(f"Debug mode enabled (F12 to disable)")
+            else:
+                self.logger.info(f"{status_message}", "DEBUG")
+                self.game_state.game_log(f"Debug mode disabled")
+            
+        except Exception as e:
+            self.logger.error("Failed to toggle debug mode", "DEBUG", e)
+    
+    def _handle_debug_panel_toggle(self, panel_name):
+        """Handle debug panel toggle (1-5 keys)"""
+        try:
+            if hasattr(self.renderer, 'debug_overlay') and self.config.debug_mode:
+                self.renderer.debug_overlay.toggle_panel(panel_name)
+                panel_status = "visible" if panel_name in self.renderer.debug_overlay.visible_panels else "hidden"
+                self.logger.debug(f"Debug panel '{panel_name}' is now {panel_status}", "DEBUG")
+                self.game_state.game_log(f"Debug panel '{panel_name}': {panel_status}")
+            
+        except Exception as e:
+            self.logger.error(f"Failed to toggle debug panel '{panel_name}'", "DEBUG", e)

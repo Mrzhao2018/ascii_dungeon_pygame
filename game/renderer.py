@@ -27,14 +27,18 @@ class Renderer:
         # Load font
         self.font, self.used_path = utils.load_preferred_font(config.tile_size)
         
-        # Initialize debug overlay (only import logger when needed)
-        self.debug_overlay = None
-        if config.debug_mode:
-            # Import here to avoid circular imports
-            from game.logging import Logger
-            logger = getattr(game_state, 'logger', None)
-            if logger:
-                self.debug_overlay = DebugOverlay(config, logger)
+        # Initialize debug overlay - always create it but enable/disable based on config
+        from game.logging import Logger
+        logger = getattr(game_state, 'logger', None)
+        if logger:
+            self.debug_overlay = DebugOverlay(config, logger)
+        else:
+            self.debug_overlay = None
+    
+    def set_debug_clock(self, clock):
+        """Set the clock object for FPS calculation in debug overlay"""
+        if self.debug_overlay:
+            self.debug_overlay.clock = clock
     
     def update_view_size(self, width: int, height: int):
         """Update view size when level changes"""
@@ -78,6 +82,8 @@ class Renderer:
         
         # Render debug overlay
         if self.debug_overlay:
+            # Update debug mode state in case it was toggled
+            self.debug_overlay.update_debug_mode()
             self.debug_overlay.render(self.screen, self.game_state, player, entity_mgr, npcs)
         
         pygame.display.flip()
