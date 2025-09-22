@@ -1,0 +1,100 @@
+{
+  "entities": [
+    {
+      "id": 1,
+      "type": "Enemy",
+      "x": 43,
+      "y": 45,
+      "hp": 5,
+      "dir": [
+        1,
+        0
+      ],
+      "kind": "basic"
+    },
+    {
+      "id": 2,
+      "type": "Enemy",
+      "x": 71,
+      "y": 51,
+      "hp": 5,
+      "dir": [
+        1,
+        0
+      ],
+      "kind": "basic"
+    },
+    {
+      "id": 3,
+      "type": "Enemy",
+      "x": 17,
+      "y": 25,
+      "hp": 5,
+      "dir": [
+        1,
+        0
+      ],
+      "kind": "basic"
+    },
+    {
+      "id": 4,
+      "type": "Enemy",
+      "x": 68,
+      "y": 49,
+      "hp": 5,
+      "dir": [
+        1,
+        0
+      ],
+      "kind": "basic"
+    },
+    {
+      "id": 5,
+      "type": "Enemy",
+      "x": 102,
+      "y": 41,
+      "hp": 5,
+      "dir": [
+        1,
+        0
+      ],
+      "kind": "basic"
+    },
+    {
+      "id": 6,
+      "type": "Enemy",
+      "x": 24,
+      "y": 38,
+      "hp": 5,
+      "dir": [
+        1,
+        0
+      ],
+      "kind": "basic"
+    },
+    {
+      "id": 7,
+      "type": "Enemy",
+      "x": 69,
+      "y": 19,
+      "hp": 5,
+      "dir": [
+        1,
+        0
+      ],
+      "kind": "basic"
+    },
+    {
+      "id": 8,
+      "type": "Enemy",
+      "x": 78,
+      "y": 28,
+      "hp": 5,
+      "dir": [
+        1,
+        0
+      ],
+      "kind": "basic"
+    }
+  ]
+}

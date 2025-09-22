@@ -1,0 +1,5038 @@
+{
+  "audio.py": {
+    "file_path": "game\\audio.py",
+    "docstring": null,
+    "classes": [],
+    "functions": [
+      {
+        "name": "init_audio",
+        "line": 5,
+        "docstring": null,
+        "args": [],
+        "returns": null,
+        "decorators": []
+      },
+      {
+        "name": "load_hit_sound",
+        "line": 38,
+        "docstring": null,
+        "args": [
+          {
+            "name": "preferred_path",
+            "annotation": null
+          }
+        ],
+        "returns": null,
+        "decorators": []
+      },
+      {
+        "name": "load_sprint_sound",
+        "line": 86,
+        "docstring": null,
+        "args": [
+          {
+            "name": "preferred_path",
+            "annotation": null
+          }
+        ],
+        "returns": null,
+        "decorators": []
+      },
+      {
+        "name": "load_sprint_ready_sound",
+        "line": 136,
+        "docstring": null,
+        "args": [
+          {
+            "name": "preferred_path",
+            "annotation": null
+          }
+        ],
+        "returns": null,
+        "decorators": []
+      }
+    ],
+    "constants": [],
+    "imports": [
+      {
+        "type": "import",
+        "modules": [
+          "pygame"
+        ],
+        "line": 1
+      },
+      {
+        "type": "import",
+        "modules": [
+          "os"
+        ],
+        "line": 2
+      },
+      {
+        "type": "import",
+        "modules": [
+          "numpy"
+        ],
+        "line": 68
+      },
+      {
+        "type": "import",
+        "modules": [
+          "numpy"
+        ],
+        "line": 119
+      },
+      {
+        "type": "import",
+        "modules": [
+          "numpy"
+        ],
+        "line": 168
+      }
+    ]
+  },
+  "config.py": {
+    "file_path": "game\\config.py",
+    "docstring": "Game configuration and command line argument parsing",
+    "classes": [
+      {
+        "name": "GameConfig",
+        "line": 11,
+        "docstring": "Handles game configuration and command line argument parsing",
+        "methods": [
+          {
+            "name": "__init__",
+            "line": 14,
+            "docstring": "Initialize game configuration",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "parse_int_arg",
+            "line": 21,
+            "docstring": "Parse integer command line argument",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "name",
+                "annotation": null
+              },
+              {
+                "name": "default",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "parse_float_arg",
+            "line": 31,
+            "docstring": "Parse float command line argument",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "name",
+                "annotation": null
+              },
+              {
+                "name": "default",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "_load_config_file",
+            "line": 41,
+            "docstring": "Load configuration from file",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "_save_config_if_requested",
+            "line": 78,
+            "docstring": "Save current configuration to file if requested",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "_update_config_from_current_settings",
+            "line": 88,
+            "docstring": "Update config file with current game settings",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "_get_config_value",
+            "line": 121,
+            "docstring": "Get value from config file with fallback to default",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "key",
+                "annotation": null
+              },
+              {
+                "name": "default",
+                "annotation": null
+              },
+              {
+                "name": "section",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "parse_arguments",
+            "line": 127,
+            "docstring": "Parse all command line arguments",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "show_help",
+            "line": 188,
+            "docstring": "Display help information",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          }
+        ],
+        "attributes": [],
+        "bases": []
+      }
+    ],
+    "functions": [],
+    "constants": [],
+    "imports": [
+      {
+        "type": "import",
+        "modules": [
+          "argparse"
+        ],
+        "line": 4
+      },
+      {
+        "type": "import",
+        "modules": [
+          "sys"
+        ],
+        "line": 5
+      },
+      {
+        "type": "import",
+        "modules": [
+          "os"
+        ],
+        "line": 6
+      },
+      {
+        "type": "from_import",
+        "module": "pathlib",
+        "names": [
+          "Path"
+        ],
+        "line": 7
+      },
+      {
+        "type": "from_import",
+        "module": "config_file",
+        "names": [
+          "ConfigFile"
+        ],
+        "line": 8
+      }
+    ]
+  },
+  "config_file.py": {
+    "file_path": "game\\config_file.py",
+    "docstring": "Game configuration file management\nSupports JSON and INI configuration files for persistent settings",
+    "classes": [
+      {
+        "name": "ConfigFile",
+        "line": 12,
+        "docstring": "Configuration file manager",
+        "methods": [
+          {
+            "name": "__init__",
+            "line": 15,
+            "docstring": "Initialize configuration file manager\n\nArgs:\n    config_path: Path to configuration file (defaults to game.conf)",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "config_path",
+                "annotation": "Optional[...]"
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "load",
+            "line": 37,
+            "docstring": "Load configuration from file\n\nReturns:\n    True if loaded successfully, False otherwise",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              }
+            ],
+            "returns": "bool",
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "save",
+            "line": 57,
+            "docstring": "Save configuration to file\n\nReturns:\n    True if saved successfully, False otherwise",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              }
+            ],
+            "returns": "bool",
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "_load_json",
+            "line": 77,
+            "docstring": "Load JSON configuration",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              }
+            ],
+            "returns": "bool",
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "_save_json",
+            "line": 83,
+            "docstring": "Save JSON configuration",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              }
+            ],
+            "returns": "bool",
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "_load_ini",
+            "line": 89,
+            "docstring": "Load INI configuration",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              }
+            ],
+            "returns": "bool",
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "_save_ini",
+            "line": 104,
+            "docstring": "Save INI configuration",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              }
+            ],
+            "returns": "bool",
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "_convert_value",
+            "line": 118,
+            "docstring": "Convert string value to appropriate type",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "value",
+                "annotation": "str"
+              }
+            ],
+            "returns": "Any",
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "get",
+            "line": 141,
+            "docstring": "Get configuration value\n\nArgs:\n    key: Configuration key\n    default: Default value if not found\n    section: Section name for INI format\n    \nReturns:\n    Configuration value or default",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "key",
+                "annotation": "str"
+              },
+              {
+                "name": "default",
+                "annotation": "Any"
+              },
+              {
+                "name": "section",
+                "annotation": "str"
+              }
+            ],
+            "returns": "Any",
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "set",
+            "line": 167,
+            "docstring": "Set configuration value\n\nArgs:\n    key: Configuration key\n    value: Value to set\n    section: Section name for INI format",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "key",
+                "annotation": "str"
+              },
+              {
+                "name": "value",
+                "annotation": "Any"
+              },
+              {
+                "name": "section",
+                "annotation": "str"
+              }
+            ],
+            "returns": "None",
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "has",
+            "line": 191,
+            "docstring": "Check if configuration key exists\n\nArgs:\n    key: Configuration key\n    section: Section name for INI format\n    \nReturns:\n    True if key exists, False otherwise",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "key",
+                "annotation": "str"
+              },
+              {
+                "name": "section",
+                "annotation": "str"
+              }
+            ],
+            "returns": "bool",
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "delete",
+            "line": 215,
+            "docstring": "Delete configuration key\n\nArgs:\n    key: Configuration key\n    section: Section name for INI format\n    \nReturns:\n    True if deleted, False if not found",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "key",
+                "annotation": "str"
+              },
+              {
+                "name": "section",
+                "annotation": "str"
+              }
+            ],
+            "returns": "bool",
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "get_all_keys",
+            "line": 247,
+            "docstring": "Get all configuration keys\n\nArgs:\n    section: Section name for INI format\n    \nReturns:\n    List of all keys",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "section",
+                "annotation": "str"
+              }
+            ],
+            "returns": "list",
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "_get_nested_keys",
+            "line": 267,
+            "docstring": "Get all nested keys from dictionary",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "data",
+                "annotation": "dict"
+              },
+              {
+                "name": "prefix",
+                "annotation": "str"
+              }
+            ],
+            "returns": "list",
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "export_to_args",
+            "line": 278,
+            "docstring": "Export configuration as command line arguments\n\nArgs:\n    prefix: Argument prefix (e.g., \"--\")\n    \nReturns:\n    List of command line arguments",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "prefix",
+                "annotation": "str"
+              }
+            ],
+            "returns": "list",
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "merge_from_args",
+            "line": 311,
+            "docstring": "Merge configuration from arguments dictionary\n\nArgs:\n    args_dict: Dictionary of arguments to merge",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "args_dict",
+                "annotation": "Dict[...]"
+              }
+            ],
+            "returns": "None",
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "create_default_config",
+            "line": 323,
+            "docstring": "Create default configuration file",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              }
+            ],
+            "returns": "None",
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          }
+        ],
+        "attributes": [],
+        "bases": []
+      }
+    ],
+    "functions": [
+      {
+        "name": "create_sample_configs",
+        "line": 363,
+        "docstring": "Create sample configuration files",
+        "args": [],
+        "returns": null,
+        "decorators": []
+      }
+    ],
+    "constants": [],
+    "imports": [
+      {
+        "type": "import",
+        "modules": [
+          "json"
+        ],
+        "line": 5
+      },
+      {
+        "type": "import",
+        "modules": [
+          "configparser"
+        ],
+        "line": 6
+      },
+      {
+        "type": "import",
+        "modules": [
+          "os"
+        ],
+        "line": 7
+      },
+      {
+        "type": "from_import",
+        "module": "pathlib",
+        "names": [
+          "Path"
+        ],
+        "line": 8
+      },
+      {
+        "type": "from_import",
+        "module": "typing",
+        "names": [
+          "Dict",
+          "Any",
+          "Optional"
+        ],
+        "line": 9
+      }
+    ]
+  },
+  "debug.py": {
+    "file_path": "game\\debug.py",
+    "docstring": "Enhanced debug overlay and developer tools",
+    "classes": [
+      {
+        "name": "DebugOverlay",
+        "line": 9,
+        "docstring": "Enhanced debug overlay showing game state and performance",
+        "methods": [
+          {
+            "name": "__init__",
+            "line": 12,
+            "docstring": null,
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "config",
+                "annotation": null
+              },
+              {
+                "name": "logger",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "_initialize_fonts",
+            "line": 36,
+            "docstring": "Initialize debug fonts",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "toggle_panel",
+            "line": 44,
+            "docstring": "Toggle visibility of a debug panel",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "panel_name",
+                "annotation": "str"
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "render",
+            "line": 51,
+            "docstring": "Render all enabled debug panels",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "screen",
+                "annotation": null
+              },
+              {
+                "name": "game_state",
+                "annotation": null
+              },
+              {
+                "name": "player",
+                "annotation": null
+              },
+              {
+                "name": "entity_mgr",
+                "annotation": null
+              },
+              {
+                "name": "npcs",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "_render_performance_panel",
+            "line": 84,
+            "docstring": "Render performance statistics panel",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "screen",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "_render_game_state_panel",
+            "line": 117,
+            "docstring": "Render game state information panel",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "screen",
+                "annotation": null
+              },
+              {
+                "name": "game_state",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "_render_player_state_panel",
+            "line": 145,
+            "docstring": "Render player state information panel",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "screen",
+                "annotation": null
+              },
+              {
+                "name": "player",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "_render_entity_debug_panel",
+            "line": 183,
+            "docstring": "Render entity debug information panel",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "screen",
+                "annotation": null
+              },
+              {
+                "name": "entity_mgr",
+                "annotation": null
+              },
+              {
+                "name": "npcs",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "_render_logs_panel",
+            "line": 218,
+            "docstring": "Render game logs panel",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "screen",
+                "annotation": null
+              },
+              {
+                "name": "game_state",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "_render_fps_counter",
+            "line": 258,
+            "docstring": "Render FPS counter in top-right corner",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "screen",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "_render_coordinates",
+            "line": 284,
+            "docstring": "Render player coordinates",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "screen",
+                "annotation": null
+              },
+              {
+                "name": "player",
+                "annotation": null
+              },
+              {
+                "name": "game_state",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "handle_debug_input",
+            "line": 302,
+            "docstring": "Handle debug-specific input",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "key",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          }
+        ],
+        "attributes": [],
+        "bases": []
+      }
+    ],
+    "functions": [],
+    "constants": [],
+    "imports": [
+      {
+        "type": "import",
+        "modules": [
+          "pygame"
+        ],
+        "line": 4
+      },
+      {
+        "type": "from_import",
+        "module": "typing",
+        "names": [
+          "List",
+          "Dict",
+          "Any",
+          "Optional"
+        ],
+        "line": 5
+      },
+      {
+        "type": "from_import",
+        "module": "game",
+        "names": [
+          "utils"
+        ],
+        "line": 6
+      }
+    ]
+  },
+  "dialogs.py": {
+    "file_path": "game\\dialogs.py",
+    "docstring": null,
+    "classes": [],
+    "functions": [
+      {
+        "name": "load_npcs",
+        "line": 6,
+        "docstring": null,
+        "args": [
+          {
+            "name": "level",
+            "annotation": null
+          },
+          {
+            "name": "WIDTH",
+            "annotation": null
+          },
+          {
+            "name": "HEIGHT",
+            "annotation": null
+          }
+        ],
+        "returns": null,
+        "decorators": []
+      },
+      {
+        "name": "get_dialog_for",
+        "line": 26,
+        "docstring": null,
+        "args": [
+          {
+            "name": "npcs",
+            "annotation": null
+          },
+          {
+            "name": "pos",
+            "annotation": null
+          }
+        ],
+        "returns": null,
+        "decorators": []
+      }
+    ],
+    "constants": [],
+    "imports": [
+      {
+        "type": "import",
+        "modules": [
+          "json"
+        ],
+        "line": 1
+      },
+      {
+        "type": "import",
+        "modules": [
+          "os"
+        ],
+        "line": 2
+      },
+      {
+        "type": "from_import",
+        "module": "typing",
+        "names": [
+          "Dict",
+          "Tuple"
+        ],
+        "line": 3
+      },
+      {
+        "type": "from_import",
+        "module": "game.utils",
+        "names": [
+          "set_tile"
+        ],
+        "line": 17
+      }
+    ]
+  },
+  "entities.py": {
+    "file_path": "game\\entities.py",
+    "docstring": null,
+    "classes": [
+      {
+        "name": "Entity",
+        "line": 7,
+        "docstring": null,
+        "methods": [
+          {
+            "name": "__init__",
+            "line": 8,
+            "docstring": null,
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "x",
+                "annotation": "int"
+              },
+              {
+                "name": "y",
+                "annotation": "int"
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "to_config",
+            "line": 14,
+            "docstring": null,
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              }
+            ],
+            "returns": "dict",
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "from_config",
+            "line": 21,
+            "docstring": null,
+            "args": [
+              {
+                "name": "cls",
+                "annotation": null
+              },
+              {
+                "name": "cfg",
+                "annotation": "dict"
+              }
+            ],
+            "returns": null,
+            "decorators": [
+              "classmethod"
+            ],
+            "is_method": true,
+            "is_static": false,
+            "is_class": true
+          }
+        ],
+        "attributes": [],
+        "bases": []
+      },
+      {
+        "name": "Enemy",
+        "line": 25,
+        "docstring": null,
+        "methods": [
+          {
+            "name": "__init__",
+            "line": 26,
+            "docstring": null,
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "x",
+                "annotation": "int"
+              },
+              {
+                "name": "y",
+                "annotation": "int"
+              },
+              {
+                "name": "hp",
+                "annotation": "int"
+              },
+              {
+                "name": "dir",
+                "annotation": null
+              },
+              {
+                "name": "kind",
+                "annotation": "str"
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "to_config",
+            "line": 32,
+            "docstring": null,
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              }
+            ],
+            "returns": "dict",
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "from_config",
+            "line": 38,
+            "docstring": null,
+            "args": [
+              {
+                "name": "cls",
+                "annotation": null
+              },
+              {
+                "name": "cfg",
+                "annotation": "dict"
+              }
+            ],
+            "returns": null,
+            "decorators": [
+              "classmethod"
+            ],
+            "is_method": true,
+            "is_static": false,
+            "is_class": true
+          }
+        ],
+        "attributes": [],
+        "bases": [
+          "Entity"
+        ]
+      },
+      {
+        "name": "EntityManager",
+        "line": 42,
+        "docstring": null,
+        "methods": [
+          {
+            "name": "__init__",
+            "line": 43,
+            "docstring": null,
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "add",
+            "line": 50,
+            "docstring": null,
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "ent",
+                "annotation": "Entity"
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "get_entity_at",
+            "line": 57,
+            "docstring": null,
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "x",
+                "annotation": "int"
+              },
+              {
+                "name": "y",
+                "annotation": "int"
+              }
+            ],
+            "returns": "Optional[...]",
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "get_entity_by_id",
+            "line": 60,
+            "docstring": null,
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "ent_id",
+                "annotation": "int"
+              }
+            ],
+            "returns": "Optional[...]",
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "remove",
+            "line": 63,
+            "docstring": null,
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "ent_or_id",
+                "annotation": "Any"
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "load_from_level",
+            "line": 74,
+            "docstring": null,
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "level",
+                "annotation": "List[...]"
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "place_entity_near",
+            "line": 81,
+            "docstring": null,
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "level",
+                "annotation": "List[...]"
+              },
+              {
+                "name": "WIDTH",
+                "annotation": "int"
+              },
+              {
+                "name": "HEIGHT",
+                "annotation": "int"
+              },
+              {
+                "name": "preferred",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "to_config_list",
+            "line": 114,
+            "docstring": null,
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              }
+            ],
+            "returns": "List[...]",
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "save_to_file",
+            "line": 117,
+            "docstring": null,
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "path",
+                "annotation": "str"
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "load_from_file",
+            "line": 122,
+            "docstring": null,
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "path",
+                "annotation": "str"
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "load_from_file",
+            "line": 144,
+            "docstring": "Load entities from a JSON file. If level is provided, ensure entities are placed on the map:\n- If the target tile is '.', place the entity there (set map char to 'E').\n- Otherwise try to find the nearest '.' and place entity there; if none found, skip the entity.",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "path",
+                "annotation": "str"
+              },
+              {
+                "name": "level",
+                "annotation": "Optional[...]"
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "update",
+            "line": 254,
+            "docstring": "Update movable entities (currently only Enemy). Returns events list.",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "level",
+                "annotation": "List[...]"
+              },
+              {
+                "name": "player_pos",
+                "annotation": "Tuple[...]"
+              },
+              {
+                "name": "WIDTH",
+                "annotation": "int"
+              },
+              {
+                "name": "HEIGHT",
+                "annotation": "int"
+              },
+              {
+                "name": "move_interval_frames",
+                "annotation": "int"
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          }
+        ],
+        "attributes": [],
+        "bases": []
+      }
+    ],
+    "functions": [
+      {
+        "name": "is_empty",
+        "line": 179,
+        "docstring": null,
+        "args": [
+          {
+            "name": "x",
+            "annotation": null
+          },
+          {
+            "name": "y",
+            "annotation": null
+          }
+        ],
+        "returns": null,
+        "decorators": []
+      },
+      {
+        "name": "has_free_neighbor",
+        "line": 182,
+        "docstring": null,
+        "args": [
+          {
+            "name": "x",
+            "annotation": null
+          },
+          {
+            "name": "y",
+            "annotation": null
+          }
+        ],
+        "returns": null,
+        "decorators": []
+      }
+    ],
+    "constants": [],
+    "imports": [
+      {
+        "type": "from_import",
+        "module": "typing",
+        "names": [
+          "Dict",
+          "Tuple",
+          "List",
+          "Any",
+          "Optional",
+          "Callable"
+        ],
+        "line": 1
+      },
+      {
+        "type": "import",
+        "modules": [
+          "json"
+        ],
+        "line": 2
+      },
+      {
+        "type": "import",
+        "modules": [
+          "os"
+        ],
+        "line": 3
+      },
+      {
+        "type": "from_import",
+        "module": "game.utils",
+        "names": [
+          "set_tile"
+        ],
+        "line": 4
+      }
+    ]
+  },
+  "floors.py": {
+    "file_path": "game\\floors.py",
+    "docstring": "Floor management and generation",
+    "classes": [
+      {
+        "name": "FloorManager",
+        "line": 10,
+        "docstring": "Manages floor generation, transitions, and state",
+        "methods": [
+          {
+            "name": "__init__",
+            "line": 13,
+            "docstring": null,
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "config",
+                "annotation": null
+              },
+              {
+                "name": "game_state",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "generate_initial_level",
+            "line": 17,
+            "docstring": "Generate the initial level based on configuration",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              }
+            ],
+            "returns": "List[...]",
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "setup_level",
+            "line": 34,
+            "docstring": "Setup a level with entities and NPCs",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "level",
+                "annotation": "List[...]"
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "find_player",
+            "line": 74,
+            "docstring": "Find player position in level",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "level",
+                "annotation": "List[...]"
+              }
+            ],
+            "returns": "Optional[...]",
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "process_floor_transition",
+            "line": 82,
+            "docstring": "Process a floor transition if ready. Returns (level, entity_mgr, npcs) or (None, None, None)",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              }
+            ],
+            "returns": "Tuple[...]",
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "_write_floor_snapshots",
+            "line": 135,
+            "docstring": "Write debug snapshots for the floor",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "level",
+                "annotation": "List[...]"
+              },
+              {
+                "name": "floor_number",
+                "annotation": "int"
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "write_initial_snapshot",
+            "line": 167,
+            "docstring": "Write snapshot for the initial floor",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "level",
+                "annotation": "List[...]"
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          }
+        ],
+        "attributes": [],
+        "bases": []
+      }
+    ],
+    "functions": [],
+    "constants": [],
+    "imports": [
+      {
+        "type": "import",
+        "modules": [
+          "os"
+        ],
+        "line": 4
+      },
+      {
+        "type": "import",
+        "modules": [
+          "time"
+        ],
+        "line": 5
+      },
+      {
+        "type": "from_import",
+        "module": "typing",
+        "names": [
+          "List",
+          "Tuple",
+          "Optional"
+        ],
+        "line": 6
+      },
+      {
+        "type": "from_import",
+        "module": "game",
+        "names": [
+          "utils",
+          "entities",
+          "dialogs"
+        ],
+        "line": 7
+      }
+    ]
+  },
+  "game.py": {
+    "file_path": "game\\game.py",
+    "docstring": "Main game class that orchestrates all game systems",
+    "classes": [
+      {
+        "name": "Game",
+        "line": 20,
+        "docstring": "Main game class that manages the game loop and systems",
+        "methods": [
+          {
+            "name": "__init__",
+            "line": 23,
+            "docstring": null,
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "_initialize_game_world",
+            "line": 69,
+            "docstring": "Initialize the game world (level, player, etc.)",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "_setup_initial_level",
+            "line": 94,
+            "docstring": "Setup the initial level with entities and NPCs",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "_initialize_audio",
+            "line": 105,
+            "docstring": "Initialize audio system",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "run",
+            "line": 113,
+            "docstring": "Main game loop with enhanced monitoring and error handling",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "_process_input_results",
+            "line": 199,
+            "docstring": "Process discrete input events",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "input_results",
+                "annotation": null
+              },
+              {
+                "name": "dt",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "_process_continuous_input",
+            "line": 220,
+            "docstring": "Process continuous input (movement, etc.)",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "continuous_input",
+                "annotation": null
+              },
+              {
+                "name": "dt",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "_handle_movement_result",
+            "line": 238,
+            "docstring": "Handle the result of player movement",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "moved_result",
+                "annotation": null
+              },
+              {
+                "name": "dt",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "_trigger_floor_transition",
+            "line": 254,
+            "docstring": "Trigger a floor transition",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "_handle_interaction",
+            "line": 271,
+            "docstring": "Handle interaction with NPCs",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "_handle_attack",
+            "line": 299,
+            "docstring": "Handle player attack",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "_handle_debug",
+            "line": 336,
+            "docstring": "Handle debug key press",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "_update_game_systems",
+            "line": 353,
+            "docstring": "Update all game systems",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "dt",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "_process_entity_events",
+            "line": 389,
+            "docstring": "Process events from entity updates",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "events",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "_process_floor_transitions",
+            "line": 429,
+            "docstring": "Process floor transitions",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "_log_performance_stats",
+            "line": 453,
+            "docstring": "Log performance statistics",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          }
+        ],
+        "attributes": [],
+        "bases": []
+      }
+    ],
+    "functions": [],
+    "constants": [],
+    "imports": [
+      {
+        "type": "import",
+        "modules": [
+          "sys"
+        ],
+        "line": 4
+      },
+      {
+        "type": "import",
+        "modules": [
+          "pygame"
+        ],
+        "line": 5
+      },
+      {
+        "type": "import",
+        "modules": [
+          "time"
+        ],
+        "line": 6
+      },
+      {
+        "type": "import",
+        "modules": [
+          "os"
+        ],
+        "line": 7
+      },
+      {
+        "type": "from_import",
+        "module": "typing",
+        "names": [
+          "Optional"
+        ],
+        "line": 8
+      },
+      {
+        "type": "from_import",
+        "module": "game.config",
+        "names": [
+          "GameConfig"
+        ],
+        "line": 10
+      },
+      {
+        "type": "from_import",
+        "module": "game.state",
+        "names": [
+          "GameState"
+        ],
+        "line": 11
+      },
+      {
+        "type": "from_import",
+        "module": "game.input",
+        "names": [
+          "InputHandler"
+        ],
+        "line": 12
+      },
+      {
+        "type": "from_import",
+        "module": "game.floors",
+        "names": [
+          "FloorManager"
+        ],
+        "line": 13
+      },
+      {
+        "type": "from_import",
+        "module": "game.renderer",
+        "names": [
+          "Renderer"
+        ],
+        "line": 14
+      },
+      {
+        "type": "from_import",
+        "module": "game.player",
+        "names": [
+          "Player"
+        ],
+        "line": 15
+      },
+      {
+        "type": "from_import",
+        "module": "game.logging",
+        "names": [
+          "Logger",
+          "ErrorHandler",
+          "create_performance_timer"
+        ],
+        "line": 16
+      },
+      {
+        "type": "from_import",
+        "module": "game",
+        "names": [
+          "entities",
+          "dialogs",
+          "audio"
+        ],
+        "line": 17
+      },
+      {
+        "type": "from_import",
+        "module": "game.utils",
+        "names": [
+          "set_tile"
+        ],
+        "line": 332
+      }
+    ]
+  },
+  "input.py": {
+    "file_path": "game\\input.py",
+    "docstring": "Input handling for the game",
+    "classes": [
+      {
+        "name": "InputHandler",
+        "line": 8,
+        "docstring": "Handles keyboard input and events",
+        "methods": [
+          {
+            "name": "__init__",
+            "line": 11,
+            "docstring": null,
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "config",
+                "annotation": null
+              },
+              {
+                "name": "game_state",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "setup_default_handlers",
+            "line": 19,
+            "docstring": "Setup default event handlers",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "handle_events",
+            "line": 26,
+            "docstring": "Handle pygame events and return action results",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "events",
+                "annotation": null
+              }
+            ],
+            "returns": "Dict[...]",
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "handle_quit",
+            "line": 44,
+            "docstring": "Handle quit event",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "event",
+                "annotation": null
+              }
+            ],
+            "returns": "Dict[...]",
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "handle_keydown",
+            "line": 48,
+            "docstring": "Handle keydown events",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "event",
+                "annotation": null
+              }
+            ],
+            "returns": "Dict[...]",
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "handle_dialog_input",
+            "line": 99,
+            "docstring": "Handle input during dialog",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "event",
+                "annotation": null
+              }
+            ],
+            "returns": "Dict[...]",
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "handle_continuous_input",
+            "line": 110,
+            "docstring": "Handle continuous key states (movement, sprint, tab)",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              }
+            ],
+            "returns": "Dict[...]",
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          }
+        ],
+        "attributes": [],
+        "bases": []
+      }
+    ],
+    "functions": [],
+    "constants": [],
+    "imports": [
+      {
+        "type": "import",
+        "modules": [
+          "pygame"
+        ],
+        "line": 4
+      },
+      {
+        "type": "from_import",
+        "module": "typing",
+        "names": [
+          "Dict",
+          "Tuple",
+          "Optional",
+          "Callable",
+          "Any"
+        ],
+        "line": 5
+      }
+    ]
+  },
+  "logging.py": {
+    "file_path": "game\\logging.py",
+    "docstring": "Enhanced logging and error handling utilities",
+    "classes": [
+      {
+        "name": "Logger",
+        "line": 12,
+        "docstring": "Enhanced logging system for the game",
+        "methods": [
+          {
+            "name": "__init__",
+            "line": 15,
+            "docstring": null,
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "config",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "debug",
+            "line": 34,
+            "docstring": "Log debug message",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "msg",
+                "annotation": "str"
+              },
+              {
+                "name": "category",
+                "annotation": "str"
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "info",
+            "line": 41,
+            "docstring": "Log info message",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "msg",
+                "annotation": "str"
+              },
+              {
+                "name": "category",
+                "annotation": "str"
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "warning",
+            "line": 45,
+            "docstring": "Log warning message",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "msg",
+                "annotation": "str"
+              },
+              {
+                "name": "category",
+                "annotation": "str"
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "error",
+            "line": 50,
+            "docstring": "Log error message with optional exception",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "msg",
+                "annotation": "str"
+              },
+              {
+                "name": "category",
+                "annotation": "str"
+              },
+              {
+                "name": "exception",
+                "annotation": "Optional[...]"
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "_log",
+            "line": 61,
+            "docstring": "Internal logging method",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "msg",
+                "annotation": "str"
+              },
+              {
+                "name": "level",
+                "annotation": "str"
+              },
+              {
+                "name": "category",
+                "annotation": "str"
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "log_performance",
+            "line": 86,
+            "docstring": "Log performance data",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "operation",
+                "annotation": "str"
+              },
+              {
+                "name": "duration_ms",
+                "annotation": "float"
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "get_performance_stats",
+            "line": 100,
+            "docstring": "Get performance statistics for an operation",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "operation",
+                "annotation": "str"
+              }
+            ],
+            "returns": "Dict[...]",
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "write_debug_snapshot",
+            "line": 116,
+            "docstring": "Write a debug snapshot file",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "filename",
+                "annotation": "str"
+              },
+              {
+                "name": "content",
+                "annotation": "str"
+              },
+              {
+                "name": "metadata",
+                "annotation": "Dict[...]"
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "clear_old_logs",
+            "line": 135,
+            "docstring": "Clear old log files",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "max_age_days",
+                "annotation": "int"
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          }
+        ],
+        "attributes": [],
+        "bases": []
+      },
+      {
+        "name": "ErrorHandler",
+        "line": 152,
+        "docstring": "Enhanced error handling and recovery",
+        "methods": [
+          {
+            "name": "__init__",
+            "line": 155,
+            "docstring": null,
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "logger",
+                "annotation": "Logger"
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "handle_exception",
+            "line": 160,
+            "docstring": "Handle an exception with logging and recovery logic\nReturns True if the operation should be retried, False if it should be skipped",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "operation",
+                "annotation": "str"
+              },
+              {
+                "name": "exception",
+                "annotation": "Exception"
+              },
+              {
+                "name": "context",
+                "annotation": "Dict[...]"
+              }
+            ],
+            "returns": "bool",
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "safe_call",
+            "line": 188,
+            "docstring": "Safely call a function with error handling",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "func",
+                "annotation": null
+              },
+              {
+                "name": "operation",
+                "annotation": "str"
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          }
+        ],
+        "attributes": [],
+        "bases": []
+      },
+      {
+        "name": "PerformanceTimer",
+        "line": 204,
+        "docstring": null,
+        "methods": [
+          {
+            "name": "__init__",
+            "line": 205,
+            "docstring": null,
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "__enter__",
+            "line": 208,
+            "docstring": null,
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "__exit__",
+            "line": 212,
+            "docstring": null,
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "exc_type",
+                "annotation": null
+              },
+              {
+                "name": "exc_val",
+                "annotation": null
+              },
+              {
+                "name": "exc_tb",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          }
+        ],
+        "attributes": [],
+        "bases": []
+      }
+    ],
+    "functions": [
+      {
+        "name": "create_performance_timer",
+        "line": 202,
+        "docstring": "Context manager for timing operations",
+        "args": [
+          {
+            "name": "logger",
+            "annotation": "Logger"
+          },
+          {
+            "name": "operation",
+            "annotation": "str"
+          }
+        ],
+        "returns": null,
+        "decorators": []
+      }
+    ],
+    "constants": [],
+    "imports": [
+      {
+        "type": "import",
+        "modules": [
+          "os"
+        ],
+        "line": 4
+      },
+      {
+        "type": "import",
+        "modules": [
+          "sys"
+        ],
+        "line": 5
+      },
+      {
+        "type": "import",
+        "modules": [
+          "traceback"
+        ],
+        "line": 6
+      },
+      {
+        "type": "import",
+        "modules": [
+          "pygame"
+        ],
+        "line": 7
+      },
+      {
+        "type": "from_import",
+        "module": "typing",
+        "names": [
+          "Optional",
+          "Any",
+          "Dict",
+          "List"
+        ],
+        "line": 8
+      },
+      {
+        "type": "from_import",
+        "module": "datetime",
+        "names": [
+          "datetime"
+        ],
+        "line": 9
+      },
+      {
+        "type": "import",
+        "modules": [
+          "time"
+        ],
+        "line": 138
+      }
+    ]
+  },
+  "performance.py": {
+    "file_path": "game\\performance.py",
+    "docstring": "Performance optimization utilities",
+    "classes": [
+      {
+        "name": "PerformanceMonitor",
+        "line": 12,
+        "docstring": "Real-time performance monitoring and data collection",
+        "methods": [
+          {
+            "name": "__init__",
+            "line": 15,
+            "docstring": null,
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "logger",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "enable",
+            "line": 53,
+            "docstring": "Enable performance monitoring",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "disable",
+            "line": 59,
+            "docstring": "Disable performance monitoring",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "start_frame",
+            "line": 65,
+            "docstring": "Mark the start of a frame",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "end_frame",
+            "line": 119,
+            "docstring": "Mark the end of a frame",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "record_render_time",
+            "line": 130,
+            "docstring": "Record rendering time",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "render_time_ms",
+                "annotation": "float"
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "record_update_time",
+            "line": 137,
+            "docstring": "Record game update time",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "update_time_ms",
+                "annotation": "float"
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "get_current_stats",
+            "line": 144,
+            "docstring": "Get current performance statistics",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              }
+            ],
+            "returns": "Dict[...]",
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "log_performance_summary",
+            "line": 173,
+            "docstring": "Log a summary of performance statistics",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          }
+        ],
+        "attributes": [],
+        "bases": []
+      },
+      {
+        "name": "PerformanceOptimizer",
+        "line": 192,
+        "docstring": "Analyzes and optimizes game performance",
+        "methods": [
+          {
+            "name": "__init__",
+            "line": 195,
+            "docstring": null,
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "logger",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "start_frame",
+            "line": 215,
+            "docstring": "Start frame performance monitoring",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "end_frame",
+            "line": 219,
+            "docstring": "End frame performance monitoring",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "get_stats",
+            "line": 223,
+            "docstring": "Get current performance statistics",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              }
+            ],
+            "returns": "Dict[...]",
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "check_performance_issues",
+            "line": 227,
+            "docstring": "Analyze performance data and return list of issues",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "performance_data",
+                "annotation": "Dict[...]"
+              }
+            ],
+            "returns": "List[...]",
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "optimize_rendering",
+            "line": 244,
+            "docstring": "Apply rendering optimizations",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "config",
+                "annotation": null
+              },
+              {
+                "name": "game_state",
+                "annotation": null
+              },
+              {
+                "name": "screen",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "get_optimized_font",
+            "line": 269,
+            "docstring": "Get cached font rendering",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "font_size",
+                "annotation": "int"
+              },
+              {
+                "name": "text",
+                "annotation": "str"
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "_cleanup_font_cache",
+            "line": 294,
+            "docstring": "Remove oldest items from font cache",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "suggest_optimizations",
+            "line": 303,
+            "docstring": "Suggest specific optimizations based on performance data",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "config",
+                "annotation": null
+              },
+              {
+                "name": "performance_data",
+                "annotation": "Dict[...]"
+              }
+            ],
+            "returns": "List[...]",
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "auto_optimize",
+            "line": 338,
+            "docstring": "Automatically apply safe optimizations",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "config",
+                "annotation": null
+              },
+              {
+                "name": "game_state",
+                "annotation": null
+              },
+              {
+                "name": "performance_data",
+                "annotation": "Dict[...]"
+              }
+            ],
+            "returns": "List[...]",
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "get_performance_report",
+            "line": 365,
+            "docstring": "Generate a comprehensive performance report",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "performance_data",
+                "annotation": "Dict[...]"
+              }
+            ],
+            "returns": "str",
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          }
+        ],
+        "attributes": [],
+        "bases": []
+      },
+      {
+        "name": "CacheManager",
+        "line": 424,
+        "docstring": "Manages various game caches for performance",
+        "methods": [
+          {
+            "name": "__init__",
+            "line": 427,
+            "docstring": null,
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "max_size",
+                "annotation": "int"
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "get_cached_surface",
+            "line": 436,
+            "docstring": "Get cached surface or generate and cache it",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "cache_type",
+                "annotation": "str"
+              },
+              {
+                "name": "key",
+                "annotation": "str"
+              },
+              {
+                "name": "generator_func",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "_cleanup_cache",
+            "line": 461,
+            "docstring": "Remove least recently used items from cache",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "cache_type",
+                "annotation": "str"
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "clear_all_caches",
+            "line": 476,
+            "docstring": "Clear all caches",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "get_cache_stats",
+            "line": 482,
+            "docstring": "Get statistics about cache usage",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              }
+            ],
+            "returns": "Dict[...]",
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          }
+        ],
+        "attributes": [],
+        "bases": []
+      }
+    ],
+    "functions": [],
+    "constants": [],
+    "imports": [
+      {
+        "type": "import",
+        "modules": [
+          "pygame"
+        ],
+        "line": 4
+      },
+      {
+        "type": "import",
+        "modules": [
+          "time"
+        ],
+        "line": 5
+      },
+      {
+        "type": "import",
+        "modules": [
+          "threading"
+        ],
+        "line": 6
+      },
+      {
+        "type": "import",
+        "modules": [
+          "os"
+        ],
+        "line": 7
+      },
+      {
+        "type": "from_import",
+        "module": "typing",
+        "names": [
+          "Dict",
+          "List",
+          "Any",
+          "Optional"
+        ],
+        "line": 8
+      },
+      {
+        "type": "from_import",
+        "module": "collections",
+        "names": [
+          "defaultdict",
+          "deque"
+        ],
+        "line": 9
+      },
+      {
+        "type": "from_import",
+        "module": "game",
+        "names": [
+          "utils"
+        ],
+        "line": 278
+      }
+    ]
+  },
+  "player.py": {
+    "file_path": "game\\player.py",
+    "docstring": null,
+    "classes": [
+      {
+        "name": "Player",
+        "line": 5,
+        "docstring": null,
+        "methods": [
+          {
+            "name": "__init__",
+            "line": 6,
+            "docstring": null,
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "x",
+                "annotation": null
+              },
+              {
+                "name": "y",
+                "annotation": null
+              },
+              {
+                "name": "hp",
+                "annotation": null
+              },
+              {
+                "name": "move_cooldown",
+                "annotation": null
+              },
+              {
+                "name": "max_stamina",
+                "annotation": null
+              },
+              {
+                "name": "stamina_regen",
+                "annotation": null
+              },
+              {
+                "name": "sprint_cost",
+                "annotation": null
+              },
+              {
+                "name": "sprint_cooldown_ms",
+                "annotation": null
+              },
+              {
+                "name": "sprint_multiplier",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "spawn_sprint_particle",
+            "line": 38,
+            "docstring": null,
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "tile_x",
+                "annotation": null
+              },
+              {
+                "name": "tile_y",
+                "annotation": null
+              },
+              {
+                "name": "dx",
+                "annotation": null
+              },
+              {
+                "name": "dy",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "update_particles",
+            "line": 45,
+            "docstring": null,
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "dt",
+                "annotation": null
+              },
+              {
+                "name": "TILE_SIZE",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "from_level",
+            "line": 59,
+            "docstring": null,
+            "args": [
+              {
+                "name": "cls",
+                "annotation": null
+              },
+              {
+                "name": "level",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [
+              "classmethod"
+            ],
+            "is_method": true,
+            "is_static": false,
+            "is_class": true
+          },
+          {
+            "name": "position",
+            "line": 66,
+            "docstring": null,
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "apply_damage",
+            "line": 69,
+            "docstring": null,
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "dmg",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "update_timers",
+            "line": 77,
+            "docstring": null,
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "dt",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "_compute_sprint_consumption",
+            "line": 99,
+            "docstring": null,
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "delta_ms",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "_compute_stamina_regen",
+            "line": 104,
+            "docstring": null,
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "delta_ms",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "attempt_move",
+            "line": 109,
+            "docstring": null,
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "level",
+                "annotation": null
+              },
+              {
+                "name": "dx",
+                "annotation": null
+              },
+              {
+                "name": "dy",
+                "annotation": null
+              },
+              {
+                "name": "is_sprinting",
+                "annotation": null
+              },
+              {
+                "name": "dt",
+                "annotation": null
+              },
+              {
+                "name": "WIDTH",
+                "annotation": null
+              },
+              {
+                "name": "HEIGHT",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "passive_stamina_update",
+            "line": 174,
+            "docstring": null,
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "dt",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          }
+        ],
+        "attributes": [],
+        "bases": []
+      }
+    ],
+    "functions": [],
+    "constants": [],
+    "imports": [
+      {
+        "type": "import",
+        "modules": [
+          "pygame"
+        ],
+        "line": 1
+      },
+      {
+        "type": "import",
+        "modules": [
+          "random"
+        ],
+        "line": 2
+      }
+    ]
+  },
+  "renderer.py": {
+    "file_path": "game\\renderer.py",
+    "docstring": "Rendering management for the game",
+    "classes": [
+      {
+        "name": "Renderer",
+        "line": 11,
+        "docstring": "Manages all rendering operations",
+        "methods": [
+          {
+            "name": "__init__",
+            "line": 14,
+            "docstring": null,
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "config",
+                "annotation": null
+              },
+              {
+                "name": "game_state",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "update_view_size",
+            "line": 39,
+            "docstring": "Update view size when level changes",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "width",
+                "annotation": "int"
+              },
+              {
+                "name": "height",
+                "annotation": "int"
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "render_frame",
+            "line": 51,
+            "docstring": "Render a complete frame",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "player",
+                "annotation": null
+              },
+              {
+                "name": "entity_mgr",
+                "annotation": null
+              },
+              {
+                "name": "floating_texts",
+                "annotation": null
+              },
+              {
+                "name": "npcs",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "_render_level_tiles",
+            "line": 85,
+            "docstring": "Render the level tiles",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "x0",
+                "annotation": "int"
+              },
+              {
+                "name": "y0",
+                "annotation": "int"
+              },
+              {
+                "name": "x1",
+                "annotation": "int"
+              },
+              {
+                "name": "y1",
+                "annotation": "int"
+              },
+              {
+                "name": "entity_mgr",
+                "annotation": null
+              },
+              {
+                "name": "player",
+                "annotation": null
+              },
+              {
+                "name": "ox",
+                "annotation": "int"
+              },
+              {
+                "name": "oy",
+                "annotation": "int"
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "_get_tile_color",
+            "line": 104,
+            "docstring": "Get the color for a tile character",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "ch",
+                "annotation": "str"
+              },
+              {
+                "name": "x",
+                "annotation": "int"
+              },
+              {
+                "name": "y",
+                "annotation": "int"
+              },
+              {
+                "name": "entity_mgr",
+                "annotation": null
+              },
+              {
+                "name": "player",
+                "annotation": null
+              }
+            ],
+            "returns": "Tuple[...]",
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "_render_ui",
+            "line": 124,
+            "docstring": "Render UI elements",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "player",
+                "annotation": null
+              },
+              {
+                "name": "floating_texts",
+                "annotation": null
+              },
+              {
+                "name": "entity_mgr",
+                "annotation": null
+              },
+              {
+                "name": "ox",
+                "annotation": "int"
+              },
+              {
+                "name": "oy",
+                "annotation": "int"
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "_render_dialog",
+            "line": 170,
+            "docstring": "Render dialog box",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "ox",
+                "annotation": "int"
+              },
+              {
+                "name": "oy",
+                "annotation": "int"
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "_render_floor_transition",
+            "line": 199,
+            "docstring": "Render floor transition overlay",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "_render_debug_logs",
+            "line": 216,
+            "docstring": "Render debug logs in the corner",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          }
+        ],
+        "attributes": [],
+        "bases": []
+      }
+    ],
+    "functions": [
+      {
+        "name": "position_lookup",
+        "line": 138,
+        "docstring": null,
+        "args": [
+          {
+            "name": "ent_id",
+            "annotation": null
+          }
+        ],
+        "returns": null,
+        "decorators": []
+      },
+      {
+        "name": "world_to_screen",
+        "line": 145,
+        "docstring": null,
+        "args": [
+          {
+            "name": "wx_px",
+            "annotation": null
+          },
+          {
+            "name": "wy_px",
+            "annotation": null
+          }
+        ],
+        "returns": null,
+        "decorators": []
+      }
+    ],
+    "constants": [],
+    "imports": [
+      {
+        "type": "import",
+        "modules": [
+          "pygame"
+        ],
+        "line": 4
+      },
+      {
+        "type": "import",
+        "modules": [
+          "random"
+        ],
+        "line": 5
+      },
+      {
+        "type": "from_import",
+        "module": "typing",
+        "names": [
+          "List",
+          "Optional",
+          "Tuple"
+        ],
+        "line": 6
+      },
+      {
+        "type": "from_import",
+        "module": "game",
+        "names": [
+          "ui",
+          "utils"
+        ],
+        "line": 7
+      },
+      {
+        "type": "from_import",
+        "module": "game.debug",
+        "names": [
+          "DebugOverlay"
+        ],
+        "line": 8
+      },
+      {
+        "type": "from_import",
+        "module": "game.logging",
+        "names": [
+          "Logger"
+        ],
+        "line": 34
+      }
+    ]
+  },
+  "state.py": {
+    "file_path": "game\\state.py",
+    "docstring": "Game state management",
+    "classes": [
+      {
+        "name": "GameState",
+        "line": 9,
+        "docstring": "Manages the overall game state",
+        "methods": [
+          {
+            "name": "__init__",
+            "line": 12,
+            "docstring": null,
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "config",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "set_level",
+            "line": 44,
+            "docstring": "Set the current level and update dimensions",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "level",
+                "annotation": "List[...]"
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "compute_exit_pos",
+            "line": 50,
+            "docstring": "Find the exit position in the current level",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "start_floor_transition",
+            "line": 63,
+            "docstring": "Start a floor transition with given parameters",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "floor_number",
+                "annotation": "int"
+              },
+              {
+                "name": "gen_seed",
+                "annotation": "int"
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "update_floor_transition",
+            "line": 83,
+            "docstring": "Update floor transition timer. Returns True if transition completed.",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "dt",
+                "annotation": "int"
+              }
+            ],
+            "returns": "bool",
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "complete_floor_transition",
+            "line": 91,
+            "docstring": "Complete the floor transition and clean up state",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "update_screen_shake",
+            "line": 103,
+            "docstring": "Update screen shake effect",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "dt",
+                "annotation": "int"
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "add_screen_shake",
+            "line": 110,
+            "docstring": "Add screen shake effect",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "update_enemy_flash",
+            "line": 114,
+            "docstring": "Update enemy flash effects",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "dt",
+                "annotation": "int"
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "add_enemy_flash",
+            "line": 121,
+            "docstring": "Add enemy flash effect",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "entity_id",
+                "annotation": "int"
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "game_log",
+            "line": 125,
+            "docstring": "Add a debug log message",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "msg",
+                "annotation": "str"
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "write_exit_log",
+            "line": 149,
+            "docstring": "Write to the persistent exit log",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "msg",
+                "annotation": "str"
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "update_camera",
+            "line": 164,
+            "docstring": "Update camera position with smooth following",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              },
+              {
+                "name": "player_x",
+                "annotation": "int"
+              },
+              {
+                "name": "player_y",
+                "annotation": "int"
+              },
+              {
+                "name": "view_px_w",
+                "annotation": "int"
+              },
+              {
+                "name": "view_px_h",
+                "annotation": "int"
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          },
+          {
+            "name": "get_screen_shake_offset",
+            "line": 194,
+            "docstring": "Get current screen shake offset",
+            "args": [
+              {
+                "name": "self",
+                "annotation": null
+              }
+            ],
+            "returns": null,
+            "decorators": [],
+            "is_method": true,
+            "is_static": false,
+            "is_class": false
+          }
+        ],
+        "attributes": [],
+        "bases": []
+      }
+    ],
+    "functions": [],
+    "constants": [],
+    "imports": [
+      {
+        "type": "import",
+        "modules": [
+          "pygame"
+        ],
+        "line": 4
+      },
+      {
+        "type": "import",
+        "modules": [
+          "os"
+        ],
+        "line": 5
+      },
+      {
+        "type": "from_import",
+        "module": "typing",
+        "names": [
+          "Optional",
+          "Dict",
+          "List",
+          "Tuple",
+          "Any"
+        ],
+        "line": 6
+      },
+      {
+        "type": "import",
+        "modules": [
+          "random"
+        ],
+        "line": 199
+      }
+    ]
+  },
+  "ui.py": {
+    "file_path": "game\\ui.py",
+    "docstring": null,
+    "classes": [],
+    "functions": [
+      {
+        "name": "get_font",
+        "line": 8,
+        "docstring": null,
+        "args": [
+          {
+            "name": "path_or_none",
+            "annotation": null
+          },
+          {
+            "name": "size",
+            "annotation": null
+          }
+        ],
+        "returns": null,
+        "decorators": []
+      },
+      {
+        "name": "draw_floating_texts",
+        "line": 20,
+        "docstring": null,
+        "args": [
+          {
+            "name": "surface",
+            "annotation": null
+          },
+          {
+            "name": "texts",
+            "annotation": null
+          },
+          {
+            "name": "base_tile_size",
+            "annotation": null
+          },
+          {
+            "name": "dt",
+            "annotation": null
+          },
+          {
+            "name": "used_font_path",
+            "annotation": null
+          },
+          {
+            "name": "position_lookup",
+            "annotation": "callable"
+          },
+          {
+            "name": "world_to_screen",
+            "annotation": "callable"
+          }
+        ],
+        "returns": null,
+        "decorators": []
+      },
+      {
+        "name": "compute_shake_offset",
+        "line": 78,
+        "docstring": null,
+        "args": [
+          {
+            "name": "screen_shake",
+            "annotation": null
+          },
+          {
+            "name": "shake_time",
+            "annotation": null
+          },
+          {
+            "name": "amplitude",
+            "annotation": null
+          }
+        ],
+        "returns": null,
+        "decorators": []
+      },
+      {
+        "name": "draw_stamina_bar",
+        "line": 86,
+        "docstring": null,
+        "args": [
+          {
+            "name": "surface",
+            "annotation": null
+          },
+          {
+            "name": "x",
+            "annotation": null
+          },
+          {
+            "name": "y",
+            "annotation": null
+          },
+          {
+            "name": "width",
+            "annotation": null
+          },
+          {
+            "name": "height",
+            "annotation": null
+          },
+          {
+            "name": "stamina",
+            "annotation": null
+          },
+          {
+            "name": "max_stamina",
+            "annotation": null
+          },
+          {
+            "name": "font",
+            "annotation": null
+          }
+        ],
+        "returns": null,
+        "decorators": []
+      },
+      {
+        "name": "draw_player_hud",
+        "line": 117,
+        "docstring": "Draw a small HUD showing HP and stamina bar at top-right.\nplayer: Player instance with hp, stamina, max_stamina, sprint_cooldown\nox, oy: shake offsets\nview_px_w: width of viewport (for positioning)",
+        "args": [
+          {
+            "name": "surface",
+            "annotation": null
+          },
+          {
+            "name": "player",
+            "annotation": null
+          },
+          {
+            "name": "ox",
+            "annotation": null
+          },
+          {
+            "name": "oy",
+            "annotation": null
+          },
+          {
+            "name": "view_px_w",
+            "annotation": null
+          },
+          {
+            "name": "font_path",
+            "annotation": null
+          }
+        ],
+        "returns": null,
+        "decorators": []
+      },
+      {
+        "name": "draw_target_indicator",
+        "line": 165,
+        "docstring": "Draw an arrow indicator pointing to target_pos (tile coords in pixels).\nIf target on-screen, draw a small marker; otherwise clamp to edge and draw arrow.\ntarget_pos: (wx_px, wy_px)",
+        "args": [
+          {
+            "name": "surface",
+            "annotation": null
+          },
+          {
+            "name": "player",
+            "annotation": null
+          },
+          {
+            "name": "target_pos",
+            "annotation": null
+          },
+          {
+            "name": "cam_x",
+            "annotation": null
+          },
+          {
+            "name": "cam_y",
+            "annotation": null
+          },
+          {
+            "name": "ox",
+            "annotation": null
+          },
+          {
+            "name": "oy",
+            "annotation": null
+          },
+          {
+            "name": "view_px_w",
+            "annotation": null
+          },
+          {
+            "name": "view_px_h",
+            "annotation": null
+          },
+          {
+            "name": "font_path",
+            "annotation": null
+          }
+        ],
+        "returns": null,
+        "decorators": []
+      },
+      {
+        "name": "draw_sprint_particles",
+        "line": 212,
+        "docstring": "Render player's sprint_particles list. world_to_screen converts world px -> screen px.\nfont: pygame Font used to render particle glyphs.",
+        "args": [
+          {
+            "name": "surface",
+            "annotation": null
+          },
+          {
+            "name": "player",
+            "annotation": null
+          },
+          {
+            "name": "world_to_screen",
+            "annotation": "callable"
+          },
+          {
+            "name": "font",
+            "annotation": null
+          }
+        ],
+        "returns": null,
+        "decorators": []
+      },
+      {
+        "name": "rot",
+        "line": 199,
+        "docstring": null,
+        "args": [
+          {
+            "name": "px",
+            "annotation": null
+          },
+          {
+            "name": "py",
+            "annotation": null
+          },
+          {
+            "name": "a",
+            "annotation": null
+          }
+        ],
+        "returns": null,
+        "decorators": []
+      }
+    ],
+    "constants": [
+      {
+        "name": "FLOAT_TOTAL",
+        "line": 24,
+        "value": "700"
+      }
+    ],
+    "imports": [
+      {
+        "type": "import",
+        "modules": [
+          "pygame"
+        ],
+        "line": 1
+      },
+      {
+        "type": "import",
+        "modules": [
+          "math"
+        ],
+        "line": 2
+      },
+      {
+        "type": "import",
+        "modules": [
+          "math"
+        ],
+        "line": 188
+      }
+    ]
+  },
+  "utils.py": {
+    "file_path": "game\\utils.py",
+    "docstring": null,
+    "classes": [],
+    "functions": [
+      {
+        "name": "find_player",
+        "line": 6,
+        "docstring": null,
+        "args": [
+          {
+            "name": "level",
+            "annotation": null
+          }
+        ],
+        "returns": null,
+        "decorators": []
+      },
+      {
+        "name": "set_tile",
+        "line": 14,
+        "docstring": null,
+        "args": [
+          {
+            "name": "level",
+            "annotation": null
+          },
+          {
+            "name": "x",
+            "annotation": null
+          },
+          {
+            "name": "y",
+            "annotation": null
+          },
+          {
+            "name": "ch",
+            "annotation": null
+          }
+        ],
+        "returns": null,
+        "decorators": []
+      },
+      {
+        "name": "load_preferred_font",
+        "line": 30,
+        "docstring": "Scan fonts/ and system fonts and return a pygame Font instance plus the path used (or None).",
+        "args": [
+          {
+            "name": "tile_size",
+            "annotation": null
+          }
+        ],
+        "returns": null,
+        "decorators": []
+      },
+      {
+        "name": "load_level",
+        "line": 93,
+        "docstring": "尝试从 data/level.txt 加载地图；若不存在则返回 fallback_level（list of str）。",
+        "args": [
+          {
+            "name": "fallback_level",
+            "annotation": null
+          }
+        ],
+        "returns": null,
+        "decorators": []
+      },
+      {
+        "name": "generate_dungeon",
+        "line": 113,
+        "docstring": "生成一个简单的房间+走廊地牢，返回 list[str] 格式的地图。\n\n算法：随机放置若干矩形房间（不重叠），然后用直线走廊连接房间中心。\n地图用 '#' 表示墙，'.' 表示地面，'@' 表示玩家起始位置，'X' 表示目标。",
+        "args": [
+          {
+            "name": "width",
+            "annotation": "int"
+          },
+          {
+            "name": "height",
+            "annotation": "int"
+          },
+          {
+            "name": "room_attempts",
+            "annotation": "int"
+          },
+          {
+            "name": "num_enemies",
+            "annotation": "int"
+          },
+          {
+            "name": "seed",
+            "annotation": "int"
+          },
+          {
+            "name": "min_room",
+            "annotation": null
+          },
+          {
+            "name": "max_room",
+            "annotation": null
+          },
+          {
+            "name": "corridor_radius",
+            "annotation": null
+          }
+        ],
+        "returns": null,
+        "decorators": []
+      },
+      {
+        "name": "center",
+        "line": 187,
+        "docstring": null,
+        "args": [
+          {
+            "name": "r",
+            "annotation": null
+          }
+        ],
+        "returns": null,
+        "decorators": []
+      },
+      {
+        "name": "carve_stepwise",
+        "line": 232,
+        "docstring": null,
+        "args": [
+          {
+            "name": "x1",
+            "annotation": null
+          },
+          {
+            "name": "y1",
+            "annotation": null
+          },
+          {
+            "name": "x2",
+            "annotation": null
+          },
+          {
+            "name": "y2",
+            "annotation": null
+          }
+        ],
+        "returns": null,
+        "decorators": []
+      }
+    ],
+    "constants": [],
+    "imports": [
+      {
+        "type": "import",
+        "modules": [
+          "os"
+        ],
+        "line": 1
+      },
+      {
+        "type": "import",
+        "modules": [
+          "json"
+        ],
+        "line": 2
+      },
+      {
+        "type": "import",
+        "modules": [
+          "pygame"
+        ],
+        "line": 3
+      },
+      {
+        "type": "import",
+        "modules": [
+          "random"
+        ],
+        "line": 119
+      },
+      {
+        "type": "import",
+        "modules": [
+          "random"
+        ],
+        "line": 121
+      },
+      {
+        "type": "import",
+        "modules": [
+          "time"
+        ],
+        "line": 329
+      }
+    ]
+  },
+  "__init__.py": {
+    "file_path": "game\\__init__.py",
+    "docstring": "PyGame 字符地牢探索游戏\n\n一个基于PyGame的2D字符模式地牢探索游戏。\n支持多层地牢、实体交互、战斗系统和debug工具。\n\n主要模块:\n- config: 游戏配置和命令行参数\n- state: 游戏状态管理  \n- input: 输入处理\n- floors: 地牢层级和生成\n- renderer: 渲染系统\n- game: 主游戏逻辑\n- player: 玩家实体\n- entities: 游戏实体系统\n- logging: 日志和错误处理\n- debug: 调试覆盖层\n- performance: 性能监控和优化\n\n使用方法:\n    python main.py              # 启动游戏\n    python main.py --help       # 查看所有选项\n    python main.py --debug      # 调试模式\n    python main.py --perf       # 性能监控",
+    "classes": [],
+    "functions": [],
+    "constants": [],
+    "imports": [
+      {
+        "type": "from_import",
+        "module": "config",
+        "names": [
+          "GameConfig"
+        ],
+        "line": 32
+      },
+      {
+        "type": "from_import",
+        "module": "state",
+        "names": [
+          "GameState"
+        ],
+        "line": 33
+      },
+      {
+        "type": "from_import",
+        "module": "game",
+        "names": [
+          "Game"
+        ],
+        "line": 34
+      },
+      {
+        "type": "from_import",
+        "module": "logging",
+        "names": [
+          "Logger",
+          "ErrorHandler"
+        ],
+        "line": 35
+      },
+      {
+        "type": "from_import",
+        "module": "debug",
+        "names": [
+          "DebugOverlay"
+        ],
+        "line": 36
+      },
+      {
+        "type": "from_import",
+        "module": "performance",
+        "names": [
+          "PerformanceOptimizer"
+        ],
+        "line": 37
+      }
+    ]
+  }
+}
