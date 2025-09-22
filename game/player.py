@@ -1,9 +1,10 @@
 import pygame
 import random
+from .fov import FOVSystem
 
 
 class Player:
-    def __init__(self, x, y, hp=10, move_cooldown=150, max_stamina=100.0, stamina_regen=6.0, sprint_cost=35.0, sprint_cooldown_ms=2000, sprint_multiplier=0.6):
+    def __init__(self, x, y, hp=10, move_cooldown=150, max_stamina=100.0, stamina_regen=6.0, sprint_cost=35.0, sprint_cooldown_ms=2000, sprint_multiplier=0.6, sight_radius=6):
         self.x = x
         self.y = y
         self.hp = hp
@@ -34,6 +35,9 @@ class Player:
 
         # sprint particles for visual tail (list of dicts with x_px,y_px,vx,vy,time)
         self.sprint_particles = []
+        
+        # FOV系统
+        self.fov_system = FOVSystem(sight_radius)
 
     def spawn_sprint_particle(self, tile_x, tile_y, dx, dy):
         bx = tile_x * 24 + 24 // 2
@@ -181,3 +185,30 @@ class Player:
         self.stamina += self._compute_stamina_regen(dt)
         if self.stamina > self.max_stamina:
             self.stamina = self.max_stamina
+    
+    def update_fov(self, level):
+        """更新玩家视野"""
+        if self.fov_system:
+            self.fov_system.calculate_fov(self.x, self.y, level)
+    
+    def is_tile_visible(self, x, y):
+        """检查瓦片是否可见"""
+        return self.fov_system.is_visible(x, y) if self.fov_system else True
+    
+    def is_tile_explored(self, x, y):
+        """检查瓦片是否已探索"""
+        return self.fov_system.is_explored(x, y) if self.fov_system else True
+    
+    def get_sight_radius(self):
+        """获取视野半径"""
+        return self.fov_system.get_sight_radius() if self.fov_system else 6
+    
+    def set_sight_radius(self, radius):
+        """设置视野半径"""
+        if self.fov_system:
+            self.fov_system.set_sight_radius(radius)
+    
+    def clear_exploration(self):
+        """清除探索记录（用于换层）"""
+        if self.fov_system:
+            self.fov_system.clear_exploration()

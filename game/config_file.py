@@ -138,7 +138,7 @@ class ConfigFile:
         # Return as string
         return value
     
-    def get(self, key: str, default: Any = None, section: str = None) -> Any:
+    def get(self, key: str, default: Any = None, section: Optional[str] = None) -> Any:
         """Get configuration value
         
         Args:
@@ -164,7 +164,7 @@ class ConfigFile:
         else:
             return self.data.get(key, default)
     
-    def set(self, key: str, value: Any, section: str = None) -> None:
+    def set(self, key: str, value: Any, section: Optional[str] = None) -> None:
         """Set configuration value
         
         Args:
@@ -188,7 +188,7 @@ class ConfigFile:
         else:
             self.data[key] = value
     
-    def has(self, key: str, section: str = None) -> bool:
+    def has(self, key: str, section: Optional[str] = None) -> bool:
         """Check if configuration key exists
         
         Args:
@@ -212,7 +212,7 @@ class ConfigFile:
         else:
             return key in self.data
     
-    def delete(self, key: str, section: str = None) -> bool:
+    def delete(self, key: str, section: Optional[str] = None) -> bool:
         """Delete configuration key
         
         Args:
@@ -244,7 +244,7 @@ class ConfigFile:
         
         return False
     
-    def get_all_keys(self, section: str = None) -> list:
+    def get_all_keys(self, section: Optional[str] = None) -> list:
         """Get all configuration keys
         
         Args:

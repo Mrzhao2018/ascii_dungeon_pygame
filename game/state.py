@@ -3,7 +3,10 @@ Game state management
 """
 import pygame
 import os
-from typing import Optional, Dict, List, Tuple, Any
+from typing import Optional, Dict, List, Tuple, Any, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from game.logging import Logger
 
 
 class GameState:
@@ -11,6 +14,9 @@ class GameState:
     
     def __init__(self, config):
         self.config = config
+        
+        # Logger (will be set by Game class)
+        self.logger: Optional['Logger'] = None
         
         # Level state
         self.level = []

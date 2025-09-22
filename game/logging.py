@@ -26,20 +26,33 @@ class Logger:
         self.config = config
         self.debug_enabled = getattr(config, 'debug_mode', False)
         
-        # Enhanced logging features
+        # Enhanced logging features with size and retention controls
         self.session_id = datetime.now().strftime("%Y%m%d_%H%M%S")
         self.log_directory = Path("logs")
         self.log_directory.mkdir(exist_ok=True)
         
+        # Logging configuration
+        self.max_log_size = getattr(config, 'max_log_size', 512 * 1024)  # 512KB default
+        self.max_log_files = getattr(config, 'max_log_files', 3)  # Keep only 3 files
+        self.enable_performance_logging = getattr(config, 'enable_performance_logging', False)
+        self.log_only_important = getattr(config, 'log_only_important', True)  # Reduce verbosity
+        
         # Create organized subdirectories
         (self.log_directory / "session").mkdir(exist_ok=True)
         (self.log_directory / "error").mkdir(exist_ok=True)
-        (self.log_directory / "performance").mkdir(exist_ok=True)
+        if self.enable_performance_logging:
+            (self.log_directory / "performance").mkdir(exist_ok=True)
         
         # Multiple log files for different purposes - now organized in subdirectories
         self.log_file = self.log_directory / "session" / f"game_{self.session_id}.log"
         self.error_log = self.log_directory / "error" / f"error_{self.session_id}.log"
-        self.performance_log = self.log_directory / "performance" / f"performance_{self.session_id}.log"
+        if self.enable_performance_logging:
+            self.performance_log = self.log_directory / "performance" / f"performance_{self.session_id}.log"
+        else:
+            self.performance_log = None
+            
+        # Clean up old logs on startup
+        self._cleanup_old_logs()
         
         # Legacy debug directory for compatibility
         self.debug_dir = os.path.join(os.path.dirname(__file__), '..', 'data', 'debug')
@@ -88,6 +101,61 @@ class Logger:
 
         self.info(f"Logger initialized with session ID: {self.session_id}")
     
+    def _cleanup_old_logs(self):
+        """Clean up old log files based on retention policy"""
+        try:
+            from datetime import timedelta
+            cutoff_time = datetime.now() - timedelta(days=3)  # Keep 3 days
+            
+            for subdir in ["session", "error", "performance"]:
+                subdir_path = self.log_directory / subdir
+                if not subdir_path.exists():
+                    continue
+                    
+                # Get all log files in subdirectory
+                log_files = list(subdir_path.glob("*.log"))
+                
+                # Remove old files
+                for log_file in log_files:
+                    try:
+                        file_time = datetime.fromtimestamp(log_file.stat().st_mtime)
+                        if file_time < cutoff_time:
+                            log_file.unlink()
+                            print(f"Removed old log: {log_file}")
+                    except Exception:
+                        continue
+                        
+                # If still too many files, keep only the newest ones
+                remaining_files = list(subdir_path.glob("*.log"))
+                if len(remaining_files) > self.max_log_files:
+                    # Sort by modification time, newest first
+                    remaining_files.sort(key=lambda f: f.stat().st_mtime, reverse=True)
+                    # Remove excess files
+                    for old_file in remaining_files[self.max_log_files:]:
+                        try:
+                            old_file.unlink()
+                            print(f"Removed excess log: {old_file}")
+                        except Exception:
+                            continue
+                            
+        except Exception as e:
+            print(f"Warning: Failed to cleanup old logs: {e}")
+    
+    def _should_log(self, level: str, category: str) -> bool:
+        """Determine if a message should be logged based on filters"""
+        if not self.log_only_important:
+            return True
+            
+        # Always log errors and warnings
+        if level in ["ERROR", "CRITICAL", "WARN"]:
+            return True
+            
+        # Filter out verbose categories in normal mode
+        if self.log_only_important and category in ["MOVEMENT", "RENDER", "INPUT", "FRAME"]:
+            return False
+            
+        return True
+    
     def debug(self, msg: str, category: str = "DEBUG"):
         """Log debug message"""
         if not self.debug_enabled:
@@ -134,8 +202,16 @@ class Logger:
             print(tb_str)
     
     def _log(self, msg: str, level: str, category: str):
-        """Internal logging method"""
+        """Internal logging method with filtering and size control"""
         try:
+            # Check if this message should be logged
+            if not self._should_log(level, category):
+                return
+                
+            # Check log file size and rotate if necessary
+            if self.log_file.exists() and self.log_file.stat().st_size > self.max_log_size:
+                self._rotate_log_file()
+            
             timestamp = datetime.now().strftime("%H:%M:%S.%f")[:-3]
             pygame_time = pygame.time.get_ticks() if pygame.get_init() else 0
             
@@ -157,6 +233,26 @@ class Logger:
                 
         except Exception:
             pass  # Silently fail logging to avoid recursion
+    
+    def _rotate_log_file(self):
+        """Rotate log file when it gets too large"""
+        try:
+            # Create backup filename with timestamp
+            backup_name = f"game_{self.session_id}_old_{datetime.now().strftime('%H%M%S')}.log"
+            backup_path = self.log_file.parent / backup_name
+            
+            # Move current log to backup
+            self.log_file.rename(backup_path)
+            
+            # Clean up old backups
+            backups = list(self.log_file.parent.glob("*_old_*.log"))
+            if len(backups) > 2:  # Keep only 2 old backups
+                backups.sort(key=lambda f: f.stat().st_mtime)
+                for old_backup in backups[:-2]:
+                    old_backup.unlink()
+                    
+        except Exception:
+            pass  # Silently fail rotation
     
     def log_performance(self, operation: str, duration_ms: float):
         """Log performance data"""
@@ -188,7 +284,7 @@ class Logger:
             'count': len(data)
         }
     
-    def write_debug_snapshot(self, filename: str, content: str, metadata: Dict[str, Any] = None):
+    def write_debug_snapshot(self, filename: str, content: str, metadata: Optional[Dict[str, Any]] = None):
         """Write a debug snapshot file"""
         try:
             filepath = os.path.join(self.debug_dir, filename)
@@ -245,8 +341,11 @@ class Logger:
             except Exception:
                 pass  # Silently fail to avoid recursion
     
-    def log_performance_detailed(self, operation: str, duration_ms: float, context: Dict[str, Any] = None):
+    def log_performance_detailed(self, operation: str, duration_ms: float, context: Optional[Dict[str, Any]] = None):
         """Log detailed performance data"""
+        if not self.enable_performance_logging or self.performance_log is None:
+            return
+            
         with self.log_lock:
             try:
                 timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
@@ -310,7 +409,7 @@ class ErrorHandler:
         self.error_counts = {}
         self.max_error_count = 10
     
-    def handle_exception(self, operation: str, exception: Exception, context: Dict[str, Any] = None) -> bool:
+    def handle_exception(self, operation: str, exception: Exception, context: Optional[Dict[str, Any]] = None) -> bool:
         """
         Handle an exception with logging and recovery logic
         Returns True if the operation should be retried, False if it should be skipped

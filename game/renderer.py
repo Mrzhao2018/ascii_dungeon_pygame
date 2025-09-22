@@ -6,6 +6,7 @@ import random
 from typing import List, Optional, Tuple
 from game import ui, utils
 from game.debug import DebugOverlay
+from game.fov import TileVisibility
 
 
 class Renderer:
@@ -89,7 +90,7 @@ class Renderer:
         pygame.display.flip()
     
     def _render_level_tiles(self, x0: int, y0: int, x1: int, y1: int, entity_mgr, player, ox: int, oy: int):
-        """Render the level tiles"""
+        """Render the level tiles with FOV support"""
         for y in range(y0, y1):
             if y >= len(self.game_state.level):
                 continue
@@ -100,7 +101,25 @@ class Renderer:
                     continue
                 
                 ch = row[x]
-                color = self._get_tile_color(ch, x, y, entity_mgr, player)
+                
+                # Check if FOV is enabled in config
+                if hasattr(self.config, 'enable_fov') and self.config.enable_fov:
+                    # 获取瓦片可见性状态
+                    visibility = TileVisibility.get_visibility_state(x, y, player.fov_system)
+                    
+                    # 根据可见性状态决定是否渲染和如何渲染
+                    if visibility == TileVisibility.HIDDEN:
+                        # 完全不可见，不渲染
+                        continue
+                    elif visibility == TileVisibility.EXPLORED:
+                        # 已探索但不可见，用暗色渲染
+                        color = self._get_explored_tile_color(ch, x, y, entity_mgr, player)
+                    else:  # VISIBLE
+                        # 当前可见，正常渲染
+                        color = self._get_tile_color(ch, x, y, entity_mgr, player)
+                else:
+                    # FOV disabled, render all tiles normally
+                    color = self._get_tile_color(ch, x, y, entity_mgr, player)
                 
                 surf = self.font.render(ch, True, color)
                 px = x * self.config.tile_size - self.game_state.cam_x + ox
@@ -126,6 +145,16 @@ class Renderer:
             return (220, 100, 100)
         else:  # '.' or other
             return (200, 200, 200)
+    
+    def _get_explored_tile_color(self, ch: str, x: int, y: int, entity_mgr, player) -> Tuple[int, int, int]:
+        """Get the color for an explored but not currently visible tile (fog of war)"""
+        # 获取正常颜色然后调暗
+        normal_color = self._get_tile_color(ch, x, y, entity_mgr, player)
+        # 应用雾化效果：显著降低亮度
+        fog_factor = 0.3
+        return (int(normal_color[0] * fog_factor), 
+                int(normal_color[1] * fog_factor), 
+                int(normal_color[2] * fog_factor))
     
     def _render_ui(self, player, floating_texts, entity_mgr, ox: int, oy: int):
         """Render UI elements"""

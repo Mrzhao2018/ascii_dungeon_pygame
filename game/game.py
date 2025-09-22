@@ -68,7 +68,8 @@ class Game:
             
             # Initialize global error handling
             self.global_error_handler = get_global_error_handler()
-            self.global_error_handler.logger = self.logger
+            if self.global_error_handler:
+                self.global_error_handler.logger = self.logger
             self.logger.debug("Global error handler initialized", "GAME")
             
             # Game loop variables
@@ -110,11 +111,12 @@ class Game:
             player_pos[0], player_pos[1], 
             hp=10, 
             move_cooldown=self.config.move_cooldown,
-            max_stamina=self.config.stamina_max, 
-            stamina_regen=self.config.stamina_regen,
-            sprint_cost=self.config.sprint_cost, 
-            sprint_cooldown_ms=self.config.sprint_cooldown_ms,
-            sprint_multiplier=self.config.sprint_multiplier
+            max_stamina=float(self.config.stamina_max) if self.config.stamina_max is not None else 100.0, 
+            stamina_regen=float(self.config.stamina_regen) if self.config.stamina_regen is not None else 12.0,
+            sprint_cost=float(self.config.sprint_cost) if self.config.sprint_cost is not None else 35.0, 
+            sprint_cooldown_ms=int(self.config.sprint_cooldown_ms) if self.config.sprint_cooldown_ms is not None else 800,
+            sprint_multiplier=float(self.config.sprint_multiplier) if self.config.sprint_multiplier is not None else 0.6,
+            sight_radius=int(self.config.sight_radius) if self.config.sight_radius is not None else 6
         )
     
     def _setup_initial_level(self):
@@ -127,7 +129,10 @@ class Game:
         self.game_state.cam_y = self.player.y * self.config.tile_size - self.renderer.view_px_h // 2
         self.game_state.cam_x = max(0, min(self.game_state.cam_x, max(0, self.game_state.width * self.config.tile_size - self.renderer.view_px_w)))
         self.game_state.cam_y = max(0, min(self.game_state.cam_y, max(0, self.game_state.height * self.config.tile_size - self.renderer.view_px_h)))
-    
+        
+        # Initialize FOV if enabled
+        if self.config.enable_fov:
+            self.player.update_fov(self.game_state.level)
     def _initialize_audio(self):
         """Initialize audio system"""
         sound_enabled = audio_mod.init_audio()
@@ -275,6 +280,10 @@ class Game:
         nx, ny = moved_result.get('new')
         target = moved_result.get('target')
         
+        # Update FOV when player moves
+        if self.config.enable_fov:
+            self.player.update_fov(self.game_state.level)
+        
         # Check for exit
         if target == 'X':
             self._trigger_floor_transition()
@@ -318,7 +327,7 @@ class Game:
         
         if found is not None:
             self.game_state.dialog_active = True
-            entry = self.npcs.get(found)
+            entry = self.npcs.get(found) if self.npcs else None
             self.game_state.game_log(f'interact found at {found} entry={entry}')
             
             if entry and 'dialog' in entry:
@@ -340,7 +349,8 @@ class Game:
             if isinstance(ent, entities.Enemy):
                 # Deal damage
                 ent.hp -= 3
-                self.game_state.add_enemy_flash(ent.id)
+                if ent.id is not None:
+                    self.game_state.add_enemy_flash(ent.id)
                 print(f'你攻击了敌人 ({nx},{ny})，剩余HP={ent.hp} id={ent.id}')
                 
                 # Add floating text
@@ -360,7 +370,8 @@ class Game:
                 
                 if ent.hp <= 0:
                     # Remove entity
-                    self.entity_mgr.remove(ent)
+                    if self.entity_mgr:
+                        self.entity_mgr.remove(ent)
                     if ent.id in self.game_state.enemy_flash:
                         del self.game_state.enemy_flash[ent.id]
                     from game.utils import set_tile
@@ -466,10 +477,18 @@ class Game:
         if result and result[0] is not None:
             level, entity_mgr, npcs, new_pos = result
             
+            # Type safety check
+            if level is None:
+                return
+            
             # Update game state
             self.game_state.set_level(level)
             self.entity_mgr = entity_mgr
             self.npcs = npcs
+            
+            # Clear FOV exploration for new floor
+            if self.config.enable_fov:
+                self.player.clear_exploration()
             
             # Update player position
             if new_pos:
@@ -483,7 +502,10 @@ class Game:
             self.game_state.cam_y = self.player.y * self.config.tile_size - self.renderer.view_px_h // 2
             self.game_state.cam_x = max(0, min(self.game_state.cam_x, max(0, self.game_state.width * self.config.tile_size - self.renderer.view_px_w)))
             self.game_state.cam_y = max(0, min(self.game_state.cam_y, max(0, self.game_state.height * self.config.tile_size - self.renderer.view_px_h)))
-    
+            
+            # Recalculate FOV for new position
+            if self.config.enable_fov:
+                self.player.update_fov(self.game_state.level)
     def _log_performance_stats(self):
         """Log performance statistics"""
         # Use the new performance monitor's summary
@@ -516,7 +538,7 @@ class Game:
             new_state = self.config.toggle_debug_mode()
             
             # Update debug overlay
-            if hasattr(self.renderer, 'debug_overlay'):
+            if hasattr(self.renderer, 'debug_overlay') and self.renderer.debug_overlay:
                 self.renderer.debug_overlay.update_debug_mode()
             
             # Update logger debug mode
@@ -537,7 +559,9 @@ class Game:
     def _handle_debug_panel_toggle(self, panel_name):
         """Handle debug panel toggle (1-5 keys)"""
         try:
-            if hasattr(self.renderer, 'debug_overlay') and self.config.debug_mode:
+            if (hasattr(self.renderer, 'debug_overlay') and 
+                self.renderer.debug_overlay and 
+                self.config.debug_mode):
                 self.renderer.debug_overlay.toggle_panel(panel_name)
                 panel_status = "visible" if panel_name in self.renderer.debug_overlay.visible_panels else "hidden"
                 self.logger.debug(f"Debug panel '{panel_name}' is now {panel_status}", "DEBUG")

@@ -133,19 +133,23 @@ class GameConfig:
         self.config_file.set('player.stamina_regen', self.stamina_regen)
         self.config_file.set('player.sprint_cooldown_ms', self.sprint_cooldown_ms)
         
+        # Update FOV settings
+        self.config_file.set('fov.sight_radius', getattr(self, 'sight_radius', 6))
+        self.config_file.set('fov.enabled', getattr(self, 'enable_fov', True))
+        
         # Update camera settings
         self.config_file.set('camera.lerp', self.cam_lerp)
         self.config_file.set('camera.deadzone', self.cam_deadzone)
         
         # Update debug settings
         self.config_file.set('debug.show_fps', self.show_fps)
-        self.config_file.set('debug.show_coords', self.show_coords)
+        self.config_file.set('debug.show_coords', self.show_coordinates)
         self.config_file.set('debug.performance_monitoring', getattr(self, 'perf_mode', False))
     
     def _get_config_value(self, key, default=None, section=None):
         """Get value from config file with fallback to default"""
         if self.config_file:
-            return self.config_file.get(key, default, section)
+            return self.config_file.get(key, default)
         return default
     
     def parse_arguments(self):
@@ -188,6 +192,24 @@ class GameConfig:
         self.stamina_regen = self.parse_float_arg('--stamina-regen', None) or self._get_config_value('player.stamina_regen', 12.0)
         self.sprint_cooldown_ms = self.parse_int_arg('--sprint-cooldown-ms', None) or self._get_config_value('player.sprint_cooldown_ms', 800)
         
+        # FOV parameters
+        self.sight_radius = self.parse_int_arg('--sight-radius', None) or self._get_config_value('fov.sight_radius', 6)
+        self.enable_fov = '--enable-fov' in sys.argv if '--enable-fov' in sys.argv or '--disable-fov' in sys.argv else self._get_config_value('fov.enabled', True)
+        if '--disable-fov' in sys.argv:
+            self.enable_fov = False
+        
+        # Logging configuration
+        self.max_log_size = self.parse_int_arg('--max-log-size', None) or self._get_config_value('logging.max_log_size', 512 * 1024)  # 512KB
+        self.max_log_files = self.parse_int_arg('--max-log-files', None) or self._get_config_value('logging.max_log_files', 3)
+        self.enable_performance_logging = '--enable-perf-logging' in sys.argv if '--enable-perf-logging' in sys.argv or '--disable-perf-logging' in sys.argv else self._get_config_value('logging.enable_performance_logging', False)
+        if '--disable-perf-logging' in sys.argv:
+            self.enable_performance_logging = False
+        self.log_only_important = '--verbose-logging' not in sys.argv and self._get_config_value('logging.log_only_important', True)
+        
+        # Debug file configuration
+        self.save_debug_levels = '--save-debug-levels' in sys.argv or self._get_config_value('debug.save_debug_levels', False)
+        self.max_debug_levels = self.parse_int_arg('--max-debug-levels', None) or self._get_config_value('debug.max_debug_levels', 3)
+        
         # Display parameters
         self.tile_size = 24
         self.fps = 30
@@ -226,6 +248,15 @@ PyGame 字符地牢探索游戏 - 命令行参数
   --create-config         创建默认配置文件
   --save-config           保存当前设置到配置文件
 
+日志和调试:
+  --max-log-size <字节>   最大日志文件大小 (默认: 512KB)
+  --max-log-files <数量>  保留的日志文件数量 (默认: 3)
+  --enable-perf-logging   启用性能日志
+  --disable-perf-logging  禁用性能日志
+  --verbose-logging       详细日志输出
+  --save-debug-levels     保存调试关卡文件
+  --max-debug-levels <数量> 保留的调试关卡数量 (默认: 3)
+
 地图生成:
   --map-width <数字>      地图宽度 (默认: 100)
   --map-height <数字>     地图高度 (默认: 40)
@@ -252,6 +283,11 @@ PyGame 字符地牢探索游戏 - 命令行参数
   --stamina-max <浮点数>          最大体力 (默认: 100.0)
   --stamina-regen <浮点数>        体力恢复速度 (默认: 12.0)
   --sprint-cooldown-ms <数字>     冲刺冷却时间(毫秒) (默认: 800)
+
+视野系统:
+  --sight-radius <数字>           视野半径 (默认: 6)
+  --enable-fov                    启用视野系统 (默认: 启用)
+  --disable-fov                   禁用视野系统
 
 开发者选项:
   --god-mode              无敌模式

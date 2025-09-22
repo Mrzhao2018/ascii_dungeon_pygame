@@ -68,7 +68,15 @@ class DebugOverlay:
     
     def render(self, screen, game_state, player, entity_mgr, npcs):
         """Render all enabled debug panels"""
-        if not self.enabled or not self.font:
+        if not self.enabled:
+            return
+            
+        # Initialize fonts if not already done
+        if self.font is None or self.small_font is None:
+            self._initialize_fonts()
+            
+        # Skip rendering if fonts failed to load
+        if not self.font or not self.small_font:
             return
         
         # Performance panel
@@ -109,7 +117,7 @@ class DebugOverlay:
         screen.blit(panel_surf, (x, y))
         
         # Title
-        title_surf = self.font.render("Performance", True, (255, 255, 0))
+        title_surf = self.font.render("Performance", True, (255, 255, 0))  # type: ignore
         screen.blit(title_surf, (x + 5, y + 5))
         
         # Performance stats
@@ -142,7 +150,7 @@ class DebugOverlay:
         screen.blit(panel_surf, (x, y))
         
         # Title
-        title_surf = self.font.render("Game State", True, (255, 255, 0))
+        title_surf = self.font.render("Game State", True, (255, 255, 0))  # type: ignore
         screen.blit(title_surf, (x + 5, y + 5))
         
         # Game state info

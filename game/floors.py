@@ -79,13 +79,13 @@ class FloorManager:
                 return x, y
         return None
     
-    def process_floor_transition(self) -> Tuple[Optional[List[str]], Optional[entities.EntityManager], Optional[dict]]:
-        """Process a floor transition if ready. Returns (level, entity_mgr, npcs) or (None, None, None)"""
+    def process_floor_transition(self) -> Tuple[Optional[List[str]], Optional[entities.EntityManager], Optional[dict], Optional[Tuple[int, int]]]:
+        """Process a floor transition if ready. Returns (level, entity_mgr, npcs, new_pos) or (None, None, None, None)"""
         if not self.game_state.floor_transition:
-            return None, None, None
+            return None, None, None, None
         
         if not self.game_state.update_floor_transition(0):  # Check if ready
-            return None, None, None
+            return None, None, None, None
         
         # Execute floor generation
         try:
@@ -130,7 +130,7 @@ class FloorManager:
         except Exception as e:
             self.game_state.game_log(f'floor transition generation failed: {e}')
             self.game_state.complete_floor_transition()
-            return None, None, None
+            return None, None, None, None
     
     def _write_floor_snapshots(self, level: List[str], floor_number: int):
         """Write debug snapshots for the floor"""

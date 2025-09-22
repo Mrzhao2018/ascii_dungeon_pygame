@@ -1,0 +1,43 @@
+{
+  "before": {
+    "logs": {
+      "count": 22,
+      "size": 24550
+    },
+    "debug": {
+      "count": 27,
+      "size": 157305
+    },
+    "total": {
+      "count": 49,
+      "size": 181855
+    }
+  },
+  "after": {
+    "logs": {
+      "count": 22,
+      "size": 24550
+    },
+    "debug": {
+      "count": 8,
+      "size": 36547
+    },
+    "total": {
+      "count": 30,
+      "size": 61097
+    }
+  },
+  "logs_cleaned": {
+    "cleaned": 0,
+    "size_freed": 0,
+    "kept": 21
+  },
+  "levels_cleaned": {
+    "cleaned": 19,
+    "size_freed": 120758,
+    "kept": 3
+  },
+  "empty_dirs_cleaned": 2,
+  "total_freed": 120758,
+  "timestamp": "2025-09-23T05:37:43.167980"
+}

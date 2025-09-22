@@ -1,6 +1,7 @@
 import os
 import json
 import pygame
+from typing import Optional
 
 
 def find_player(level):
@@ -110,7 +111,7 @@ def load_level(fallback_level):
         return fallback_level
 
 
-def generate_dungeon(width: int = None, height: int = None, room_attempts: int = 18, num_enemies: int = 8, seed: int = None, min_room=4, max_room=12, corridor_radius=1):
+def generate_dungeon(width: Optional[int] = None, height: Optional[int] = None, room_attempts: int = 18, num_enemies: int = 8, seed: Optional[int] = None, min_room=4, max_room=12, corridor_radius=1):
     """生成一个简单的房间+走廊地牢，返回 list[str] 格式的地图。
 
     算法：随机放置若干矩形房间（不重叠），然后用直线走廊连接房间中心。
