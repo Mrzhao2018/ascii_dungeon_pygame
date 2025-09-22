@@ -6,7 +6,7 @@ PyGame 字符地牢探索游戏
 
 主要模块:
 - config: 游戏配置和命令行参数
-- state: 游戏状态管理  
+- state: 游戏状态管理
 - input: 输入处理
 - floors: 地牢层级和生成
 - renderer: 渲染系统
@@ -36,12 +36,4 @@ from .logging import Logger, ErrorHandler
 from .debug import DebugOverlay
 from .performance import PerformanceOptimizer
 
-__all__ = [
-    'GameConfig',
-    'GameState', 
-    'Game',
-    'Logger',
-    'ErrorHandler',
-    'DebugOverlay',
-    'PerformanceOptimizer'
-]
+__all__ = ['GameConfig', 'GameState', 'Game', 'Logger', 'ErrorHandler', 'DebugOverlay', 'PerformanceOptimizer']

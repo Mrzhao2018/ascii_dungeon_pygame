@@ -1,8 +1,7 @@
-from typing import Dict, Tuple, List, Any, Optional, Callable
 import json
 import os
+from typing import Dict, List, Optional, Tuple, Any
 from game.utils import set_tile
-
 
 class Entity:
     def __init__(self, x: int, y: int):
@@ -36,7 +35,13 @@ class Enemy(Entity):
 
     @classmethod
     def from_config(cls, cfg: dict):
-        return cls(int(cfg.get('x', 0)), int(cfg.get('y', 0)), int(cfg.get('hp', 5)), tuple(cfg.get('dir', (1, 0))), cfg.get('kind', 'basic'))
+        return cls(
+            int(cfg.get('x', 0)),
+            int(cfg.get('y', 0)),
+            int(cfg.get('hp', 5)),
+            tuple(cfg.get('dir', (1, 0))),
+            cfg.get('kind', 'basic'),
+        )
 
 
 class EntityManager:
@@ -86,8 +91,8 @@ class EntityManager:
         found = None
         for r in range(0, max(WIDTH, HEIGHT)):
             stop = False
-            for dy in range(-r, r+1):
-                for dx in range(-r, r+1):
+            for dy in range(-r, r + 1):
+                for dx in range(-r, r + 1):
                     nx = px0 + dx
                     ny = py0 + dy
                     if 0 <= nx < WIDTH and 0 <= ny < HEIGHT and level[ny][nx] == '.':
@@ -141,7 +146,7 @@ class EntityManager:
         except Exception:
             pass
 
-    def load_from_file(self, path: str, level: Optional[List[str]] = None):
+    def load_from_file_with_level(self, path: str, level: Optional[List[str]] = None):
         """Load entities from a JSON file. If level is provided, ensure entities are placed on the map:
         - If the target tile is '.', place the entity there (set map char to 'E').
         - Otherwise try to find the nearest '.' and place entity there; if none found, skip the entity.
@@ -176,11 +181,12 @@ class EntityManager:
                             w = len(level[0])
                             h = len(level)
                             ex, ey = int(e.x), int(e.y)
+
                             def is_empty(x, y):
                                 return 0 <= x < w and 0 <= y < h and level[y][x] == '.'
 
                             def has_free_neighbor(x, y):
-                                for dxn, dyn in ((1,0),(-1,0),(0,1),(0,-1)):
+                                for dxn, dyn in ((1, 0), (-1, 0), (0, 1), (0, -1)):
                                     nxn, nyn = x + dxn, y + dyn
                                     if 0 <= nxn < w and 0 <= nyn < h and level[nyn][nxn] == '.':
                                         return True
@@ -192,8 +198,8 @@ class EntityManager:
                                 found_any = None
                                 for r in range(1, max(w, h)):
                                     stop = False
-                                    for dy in range(-r, r+1):
-                                        for dx in range(-r, r+1):
+                                    for dy in range(-r, r + 1):
+                                        for dx in range(-r, r + 1):
                                             nx = ex + dx
                                             ny = ey + dy
                                             if is_empty(nx, ny):
@@ -224,8 +230,8 @@ class EntityManager:
                                     found = None
                                     for r in range(1, max(w, h)):
                                         stop = False
-                                        for dy in range(-r, r+1):
-                                            for dx in range(-r, r+1):
+                                        for dy in range(-r, r + 1):
+                                            for dx in range(-r, r + 1):
                                                 nx = ex + dx
                                                 ny = ey + dy
                                                 if is_empty(nx, ny) and has_free_neighbor(nx, ny):
@@ -251,7 +257,9 @@ class EntityManager:
         except Exception:
             pass
 
-    def update(self, level: List[str], player_pos: Tuple[int, int], WIDTH: int, HEIGHT: int, move_interval_frames: int = 15):
+    def update(
+        self, level: List[str], player_pos: Tuple[int, int], WIDTH: int, HEIGHT: int, move_interval_frames: int = 15
+    ):
         """Update movable entities (currently only Enemy). Returns events list."""
         events: List[dict] = []
 
@@ -328,7 +336,7 @@ class EntityManager:
                 else:
                     # debug: if enemy cannot move and has no free neighbor, print diagnostic
                     neigh = {}
-                    for dxn, dyn in ((1,0),(-1,0),(0,1),(0,-1)):
+                    for dxn, dyn in ((1, 0), (-1, 0), (0, 1), (0, -1)):
                         txn, tyn = ex + dxn, ey + dyn
                         if 0 <= tyn < HEIGHT and 0 <= txn < WIDTH:
                             neigh[(txn, tyn)] = level[tyn][txn]
@@ -336,7 +344,9 @@ class EntityManager:
                             neigh[(txn, tyn)] = None
                     free_neighbors = [p for p, ch in neigh.items() if ch == '.']
                     if not free_neighbors:
-                        print(f'[entity-debug] stuck enemy at ({ex},{ey}) tile={level[ey][ex]} neigh={neigh} hp={getattr(ent,"hp",None)} dir={ent.dir}')
+                        print(
+                            f'[entity-debug] stuck enemy at ({ex},{ey}) tile={level[ey][ex]} neigh={neigh} hp={getattr(ent,"hp",None)} dir={ent.dir}'
+                        )
                     ent.dir = (-dx, -dy)
 
         return events

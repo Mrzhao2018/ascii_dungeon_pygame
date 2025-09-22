@@ -3,7 +3,6 @@ import json
 import pygame
 from typing import Optional
 
-
 def find_player(level):
     for y, row in enumerate(level):
         x = row.find("@")
@@ -25,7 +24,7 @@ def set_tile(level, x, y, ch):
     # if there's an exit here, don't overwrite it by default
     if cur == 'X' and ch != 'X':
         return
-    level[y] = row[:x] + ch + row[x+1:]
+    level[y] = row[:x] + ch + row[x + 1 :]
 
 
 def load_preferred_font(tile_size):
@@ -66,8 +65,13 @@ def load_preferred_font(tile_size):
 
     if font is None:
         system_font_names = [
-            'Microsoft YaHei', 'Microsoft YaHei UI', 'SimHei', 'SimSun',
-            'Noto Sans CJK SC', 'WenQuanYi Micro Hei', 'Arial Unicode MS',
+            'Microsoft YaHei',
+            'Microsoft YaHei UI',
+            'SimHei',
+            'SimSun',
+            'Noto Sans CJK SC',
+            'WenQuanYi Micro Hei',
+            'Arial Unicode MS',
         ]
         for name in system_font_names:
             try:
@@ -111,7 +115,16 @@ def load_level(fallback_level):
         return fallback_level
 
 
-def generate_dungeon(width: Optional[int] = None, height: Optional[int] = None, room_attempts: int = 18, num_enemies: int = 8, seed: Optional[int] = None, min_room=4, max_room=12, corridor_radius=1):
+def generate_dungeon(
+    width: Optional[int] = None,
+    height: Optional[int] = None,
+    room_attempts: int = 18,
+    num_enemies: int = 8,
+    seed: Optional[int] = None,
+    min_room=4,
+    max_room=12,
+    corridor_radius=1,
+):
     """生成一个简单的房间+走廊地牢，返回 list[str] 格式的地图。
 
     算法：随机放置若干矩形房间（不重叠），然后用直线走廊连接房间中心。
@@ -166,8 +179,8 @@ def generate_dungeon(width: Optional[int] = None, height: Optional[int] = None, 
         new_room = (rx, ry, rw, rh)
         # 检查重叠（允许更紧密靠近以形成更自然的连通空间）
         ok = True
-        for (ox, oy, ow, oh) in rooms:
-            if (rx < ox + ow + 2 and rx + rw + 2 > ox and ry < oy + oh + 2 and ry + rh + 2 > oy):
+        for ox, oy, ow, oh in rooms:
+            if rx < ox + ow + 2 and rx + rw + 2 > ox and ry < oy + oh + 2 and ry + rh + 2 > oy:
                 ok = False
                 break
         if ok:
@@ -259,7 +272,7 @@ def generate_dungeon(width: Optional[int] = None, height: Optional[int] = None, 
                     elif y + 1 < height - 1:
                         y += 1
 
-        for (a, b) in edges:
+        for a, b in edges:
             (x1, y1) = centers[a]
             (x2, y2) = centers[b]
             carve_stepwise(x1, y1, x2, y2)
@@ -292,10 +305,10 @@ def generate_dungeon(width: Optional[int] = None, height: Optional[int] = None, 
         if floor_tiles:
             cx, cy = width // 2, height // 2
             # player near center
-            best_p = min(floor_tiles, key=lambda t: abs(t[0]-cx) + abs(t[1]-cy))
+            best_p = min(floor_tiles, key=lambda t: abs(t[0] - cx) + abs(t[1] - cy))
             grid[best_p[1]][best_p[0]] = '@'
             # exit farthest from player
-            best_e = max(floor_tiles, key=lambda t: abs(t[0]-best_p[0]) + abs(t[1]-best_p[1]))
+            best_e = max(floor_tiles, key=lambda t: abs(t[0] - best_p[0]) + abs(t[1] - best_p[1]))
             grid[best_e[1]][best_e[0]] = 'X'
     # place enemies on random floor tiles (not on player or target)
     if seed is not None:
@@ -307,7 +320,7 @@ def generate_dungeon(width: Optional[int] = None, height: Optional[int] = None, 
         n = min(num_enemies, len(floor_positions))
         picks = _r.sample(floor_positions, n)
         next_id = 1
-        for (ex, ey) in picks:
+        for ex, ey in picks:
             # avoid player/target tile
             if grid[ey][ex] in ('@', 'X'):
                 continue
@@ -328,6 +341,7 @@ def generate_dungeon(width: Optional[int] = None, height: Optional[int] = None, 
     # Debug: write a snapshot of the generated level for offline inspection (includes E markers)
     try:
         import time as _time
+
         level_lines = [''.join(row) for row in grid]
         # find exit and player positions
         exit_pos = None

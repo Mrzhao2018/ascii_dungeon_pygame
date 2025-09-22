@@ -1,6 +1,5 @@
 import json
 import os
-from typing import Dict, Tuple
 
 
 def load_npcs(level, WIDTH, HEIGHT):
@@ -15,6 +14,7 @@ def load_npcs(level, WIDTH, HEIGHT):
                 ch = entry.get('char', 'N')
                 if 0 <= nx < WIDTH and 0 <= ny < HEIGHT and level[ny][nx] == '.':
                     from game.utils import set_tile
+
                     set_tile(level, nx, ny, ch)
                     npcs[(nx, ny)] = entry
     except FileNotFoundError:

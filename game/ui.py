@@ -1,8 +1,11 @@
 import pygame
+import pygame
 import math
+from typing import Dict, Optional, Tuple, Callable, Any
 
 # 简单字体缓存，避免重复创建 Font 对象
-_font_cache = {}
+# Font cache to avoid reloading fonts
+_font_cache: Dict[Tuple[str, int], pygame.font.Font] = {}
 
 
 def get_font(path_or_none, size):
@@ -17,7 +20,15 @@ def get_font(path_or_none, size):
     return f
 
 
-def draw_floating_texts(surface, texts, base_tile_size, dt, used_font_path=None, position_lookup: callable = None, world_to_screen: callable = None):
+def draw_floating_texts(
+    surface,
+    texts,
+    base_tile_size,
+    dt,
+    used_font_path=None,
+    position_lookup: Optional[Callable] = None,
+    world_to_screen: Optional[Callable] = None,
+):
     # texts supports two formats:
     # - legacy: {'x','y','text','time','alpha','damage'} (x/y in pixels)
     # - ent-based: {'ent_id', 'text','time','alpha','damage','last_pos':(x_px,y_px)}
@@ -142,12 +153,12 @@ def draw_player_hud(surface, player, ox, oy, view_px_w, font_path=None):
                 radius = int(6 + 6 * cd_pct)
                 radius = max(4, min(12, radius))
                 alpha = int(140 * cd_pct)
-                s = pygame.Surface((radius*2, radius*2), pygame.SRCALPHA)
+                s = pygame.Surface((radius * 2, radius * 2), pygame.SRCALPHA)
                 pygame.draw.circle(s, (200, 80, 80, alpha), (radius, radius), radius)
                 surface.blit(s, (cx - radius, cy - radius))
                 txt_font = get_font(font_path, 12)
                 txt = '疲'
-                txt_s = txt_font.render(txt, True, (255,255,255))
+                txt_s = txt_font.render(txt, True, (255, 255, 255))
                 try:
                     txt_alpha = int(40 + 60 * cd_pct)
                     txt_s.set_alpha(txt_alpha)
@@ -155,7 +166,7 @@ def draw_player_hud(surface, player, ox, oy, view_px_w, font_path=None):
                     pass
                 sw = txt_s.get_width()
                 sh = txt_s.get_height()
-                surface.blit(txt_s, (cx - sw//2, cy - sh//2))
+                surface.blit(txt_s, (cx - sw // 2, cy - sh // 2))
             except Exception:
                 pass
     except Exception:
@@ -173,7 +184,7 @@ def draw_target_indicator(surface, player, target_pos, cam_x, cam_y, ox, oy, vie
         sy = wy_px - cam_y + oy
         # if on-screen, draw small circle at target
         if 0 <= sx < view_px_w and 0 <= sy < view_px_h:
-            pygame.draw.circle(surface, (240,200,80), (int(sx), int(sy)), 6)
+            pygame.draw.circle(surface, (240, 200, 80), (int(sx), int(sy)), 6)
             return
 
         # otherwise clamp position to viewport edge and compute angle
@@ -185,7 +196,6 @@ def draw_target_indicator(surface, player, target_pos, cam_x, cam_y, ox, oy, vie
         dx = sx - center_x
         dy = sy - center_y
         # normalize
-        import math
         mag = math.hypot(dx, dy)
         if mag == 0:
             return
@@ -196,22 +206,32 @@ def draw_target_indicator(surface, player, target_pos, cam_x, cam_y, ox, oy, vie
         edge_y = center_y + uy * (min(center_x, center_y) - 20)
         # draw triangle arrow
         angle = math.atan2(uy, ux)
+
         def rot(px, py, a):
             return (px * math.cos(a) - py * math.sin(a), px * math.sin(a) + py * math.cos(a))
+
         size = 10
         p1 = (edge_x + ux * 6, edge_y + uy * 6)
-        left = rot(-size, -size/2, angle)
-        right = rot(-size, size/2, angle)
+        left = rot(-size, -size / 2, angle)
+        right = rot(-size, size / 2, angle)
         p2 = (edge_x + left[0], edge_y + left[1])
         p3 = (edge_x + right[0], edge_y + right[1])
-        pygame.draw.polygon(surface, (200,200,80), [(int(p1[0]), int(p1[1])), (int(p2[0]), int(p2[1])), (int(p3[0]), int(p3[1]))])
-    except Exception:
-        pass
+        pygame.draw.polygon(
+            surface, (200, 200, 80), [(int(p1[0]), int(p1[1])), (int(p2[0]), int(p2[1])), (int(p3[0]), int(p3[1]))]
+        )
+    except Exception as e:
+        # Log the error instead of silently ignoring it
+        print(f"Error in draw_target_indicator: {e}")
+        import traceback
+        traceback.print_exc()
 
 
-def draw_sprint_particles(surface, player, world_to_screen: callable, font):
+def draw_sprint_particles(surface, player, world_to_screen: Optional[Callable], font):
     """Render player's sprint_particles list. world_to_screen converts world px -> screen px.
     font: pygame Font used to render particle glyphs."""
+    if world_to_screen is None:
+        return
+
     try:
         for p in list(getattr(player, 'sprint_particles', [])):
             sx, sy = world_to_screen(p['x_px'], p['y_px'])

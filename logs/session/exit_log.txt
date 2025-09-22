@@ -74,3 +74,6 @@
 [6913] Generating floor 2 with seed 12347, size 80x30
 [6927] Wrote floor snapshot: E:\pygame\game\..\data\debug\maps\last_level_floor_2.txt
 [6928] Wrote post-entity floor snapshot: E:\pygame\game\..\data\debug\maps\last_level_floor_2_after_entities.txt
+[382] Generating floor 2 with seed 54321, size 80x30
+[407] Wrote floor snapshot: E:\pygame\game\..\data\debug\maps\last_level_floor_2.txt
+[407] Wrote post-entity floor snapshot: E:\pygame\game\..\data\debug\maps\last_level_floor_2_after_entities.txt

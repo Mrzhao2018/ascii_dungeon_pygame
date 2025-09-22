@@ -1,10 +1,21 @@
-import pygame
 import random
 from .fov import FOVSystem
 
 
 class Player:
-    def __init__(self, x, y, hp=10, move_cooldown=150, max_stamina=100.0, stamina_regen=6.0, sprint_cost=35.0, sprint_cooldown_ms=2000, sprint_multiplier=0.6, sight_radius=6):
+    def __init__(
+        self,
+        x,
+        y,
+        hp=10,
+        move_cooldown=150,
+        max_stamina=100.0,
+        stamina_regen=6.0,
+        sprint_cost=35.0,
+        sprint_cooldown_ms=2000,
+        sprint_multiplier=0.6,
+        sight_radius=6,
+    ):
         self.x = x
         self.y = y
         self.hp = hp
@@ -35,7 +46,7 @@ class Player:
 
         # sprint particles for visual tail (list of dicts with x_px,y_px,vx,vy,time)
         self.sprint_particles = []
-        
+
         # FOV系统
         self.fov_system = FOVSystem(sight_radius)
 
@@ -107,12 +118,19 @@ class Player:
 
     def _compute_stamina_regen(self, delta_ms):
         frac = max(0.0, min(1.0, self.stamina / self.max_stamina))
-        factor = 0.25 + 0.75 * (frac ** 0.5)
+        factor = 0.25 + 0.75 * (frac**0.5)
         return self.stamina_regen_per_sec * factor * (delta_ms / 1000.0)
 
     def attempt_move(self, level, dx, dy, is_sprinting, dt, WIDTH, HEIGHT):
         # returns dict: {moved:bool, old:(x,y), new:(x,y), target:ch, sprinting:bool, drained:bool}
-        result = {'moved': False, 'old': (self.x, self.y), 'new': (self.x, self.y), 'target': None, 'sprinting': False, 'drained': False}
+        result = {
+            'moved': False,
+            'old': (self.x, self.y),
+            'new': (self.x, self.y),
+            'target': None,
+            'sprinting': False,
+            'drained': False,
+        }
 
         # decide sprinting_this_frame based on stamina and cooldown
         sprinting_this_frame = is_sprinting and self.stamina > 0.0 and self.sprint_cooldown <= 0
@@ -143,8 +161,8 @@ class Player:
             return result
 
         # perform move
-        level[self.y] = level[self.y][:self.x] + '.' + level[self.y][self.x+1:]
-        level[ny] = level[ny][:nx] + '@' + level[ny][nx+1:]
+        level[self.y] = level[self.y][: self.x] + '.' + level[self.y][self.x + 1 :]
+        level[ny] = level[ny][:nx] + '@' + level[ny][nx + 1 :]
         self.x = nx
         self.y = ny
         result['moved'] = True
@@ -185,29 +203,29 @@ class Player:
         self.stamina += self._compute_stamina_regen(dt)
         if self.stamina > self.max_stamina:
             self.stamina = self.max_stamina
-    
+
     def update_fov(self, level):
         """更新玩家视野"""
         if self.fov_system:
             self.fov_system.calculate_fov(self.x, self.y, level)
-    
+
     def is_tile_visible(self, x, y):
         """检查瓦片是否可见"""
         return self.fov_system.is_visible(x, y) if self.fov_system else True
-    
+
     def is_tile_explored(self, x, y):
         """检查瓦片是否已探索"""
         return self.fov_system.is_explored(x, y) if self.fov_system else True
-    
+
     def get_sight_radius(self):
         """获取视野半径"""
         return self.fov_system.get_sight_radius() if self.fov_system else 6
-    
+
     def set_sight_radius(self, radius):
         """设置视野半径"""
         if self.fov_system:
             self.fov_system.set_sight_radius(radius)
-    
+
     def clear_exploration(self):
         """清除探索记录（用于换层）"""
         if self.fov_system:

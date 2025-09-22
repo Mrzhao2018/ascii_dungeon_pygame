@@ -75,7 +75,7 @@ def test_floor_transition_detailed():
     print(f"Exit 'X' count after entity clearing: {exit_count_after_clear}")
     
     # Load entities
-    entity_mgr.load_from_file(enemies_path, level=level)
+    entity_mgr.load_from_file_with_level(enemies_path, level=level)
     if not any(isinstance(e, entities.Enemy) for e in entity_mgr.entities_by_id.values()):
         entity_mgr.load_from_level(level)
         entity_mgr.place_entity_near(level, WIDTH, HEIGHT)

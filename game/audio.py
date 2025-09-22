@@ -66,6 +66,7 @@ def load_hit_sound(preferred_path=None):
 
     try:
         import numpy as _np
+
         # 生成短正弦波
         freq = 600
         duration = 0.06
@@ -117,6 +118,7 @@ def load_sprint_sound(preferred_path=None):
 
     try:
         import numpy as _np
+
         freq = 900
         duration = 0.05
         sample_rate = 22050
@@ -166,6 +168,7 @@ def load_sprint_ready_sound(preferred_path=None):
         pass
     try:
         import numpy as _np
+
         freq = 1100
         duration = 0.08
         sample_rate = 22050
