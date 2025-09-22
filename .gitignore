@@ -22,6 +22,20 @@ ENV/
 # PyCharm
 .idea/
 
-# Others
+# Game logs and debug files
+logs/
 *.log
+data/debug/
+cleanup_report.json
+
+# Game data
 *.sqlite3
+game.json.backup
+
+# Temporary files
+*.tmp
+*.bak
+*~
+
+# Archive and backups
+archive/*.py
