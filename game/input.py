@@ -42,6 +42,11 @@ class InputHandler:
         """Handle keydown events"""
         result: Dict[str, Any] = {}
 
+        # 检查游戏状态 - 如果是游戏结束状态，只处理重新开始和退出
+        from game.state import GameStateEnum
+        if self.game_state.current_state == GameStateEnum.GAME_OVER:
+            return self._handle_game_over_input(event)
+
         # Skip input during floor transition
         if self.game_state.floor_transition:
             self.game_state.game_log('input ignored during floor transition')
@@ -110,6 +115,24 @@ class InputHandler:
                 result['toggle_debug_panel'] = debug_panel_keys[event.key]
                 return result
 
+        return result
+
+    def _handle_game_over_input(self, event) -> Dict[str, Any]:
+        """处理游戏结束状态下的输入"""
+        result: Dict[str, Any] = {}
+        
+        # R键 - 重新开始游戏
+        if event.key == pygame.K_r:
+            from game.state import GameStateEnum
+            self.game_state.set_game_state(GameStateEnum.RESTART)
+            result['restart_game'] = True
+            return result
+        
+        # ESC键 - 退出游戏
+        if event.key == pygame.K_ESCAPE:
+            result['quit'] = True
+            return result
+        
         return result
 
     def handle_dialog_input(self, event) -> Dict[str, Any]:

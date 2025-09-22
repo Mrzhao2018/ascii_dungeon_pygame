@@ -24,9 +24,72 @@ class Entity:
 class Enemy(Entity):
     def __init__(self, x: int, y: int, hp: int = 5, dir=(1, 0), kind: str = 'basic'):
         super().__init__(x, y)
-        self.hp = hp
-        self.dir = tuple(dir)
         self.kind = kind
+        
+        # 敌人类型属性
+        self.enemy_stats = self._get_enemy_stats(kind)
+        
+        # 根据类型设置默认HP
+        if hp == 5:  # 如果是默认HP，则根据类型调整
+            default_hp = {
+                'basic': 5,
+                'guard': 8,
+                'scout': 3,
+                'brute': 12
+            }
+            self.hp = default_hp.get(kind, 5)
+        else:
+            self.hp = hp
+            
+        self.dir = tuple(dir)
+        
+        # AI状态和寻路
+        self.path: List[Tuple[int, int]] = []  # 当前路径
+        self.target_pos: Optional[Tuple[int, int]] = None  # 目标位置
+        self.patrol_points: List[Tuple[int, int]] = []  # 巡逻点
+        self.state: str = 'patrol'  # 状态: patrol, chase, attack
+        self.last_player_pos: Optional[Tuple[int, int]] = None  # 上次看到玩家的位置
+        self.stuck_counter: int = 0  # 卡住计数器
+        self.ai_cooldown: int = 0  # AI决策冷却
+        self.move_cooldown: int = 0  # 独立的移动冷却
+        
+    def _get_enemy_stats(self, kind: str) -> dict:
+        """获取敌人类型的属性"""
+        stats = {
+            'basic': {
+                'chase_range': 6,
+                'patrol_range': 3,
+                'speed': 1,
+                'damage': 1,
+                'ai_update_interval': 3,  # 大幅提升反应速度
+                'move_interval': 6        # 移动间隔：快速
+            },
+            'guard': {
+                'chase_range': 8,
+                'patrol_range': 2,
+                'speed': 1,
+                'damage': 2,
+                'ai_update_interval': 2,  # 守卫反应最快
+                'move_interval': 5        # 移动间隔：很快
+            },
+            'scout': {
+                'chase_range': 10,
+                'patrol_range': 5,
+                'speed': 2,
+                'damage': 1,
+                'ai_update_interval': 1,  # 侦察兵瞬间反应
+                'move_interval': 3        # 移动间隔：极快
+            },
+            'brute': {
+                'chase_range': 4,
+                'patrol_range': 1,
+                'speed': 1,
+                'damage': 3,
+                'ai_update_interval': 4,  # 重装兵稍慢，但仍然比之前快很多
+                'move_interval': 8        # 移动间隔：较慢但仍然可以接受
+            }
+        }
+        return stats.get(kind, stats['basic'])
 
     def to_config(self) -> dict:
         c = super().to_config()
@@ -35,12 +98,25 @@ class Enemy(Entity):
 
     @classmethod
     def from_config(cls, cfg: dict):
+        kind = cfg.get('kind', 'basic')
+        
+        # 根据类型设置默认HP
+        default_hp = {
+            'basic': 5,
+            'guard': 8,
+            'scout': 3,
+            'brute': 12
+        }
+        
+        # 如果配置中没有HP或者HP是默认值，使用类型对应的HP
+        hp = cfg.get('hp', default_hp.get(kind, 5))
+        
         return cls(
             int(cfg.get('x', 0)),
             int(cfg.get('y', 0)),
-            int(cfg.get('hp', 5)),
+            hp,
             tuple(cfg.get('dir', (1, 0))),
-            cfg.get('kind', 'basic'),
+            kind,
         )
 
 
@@ -57,7 +133,8 @@ class EntityManager:
             ent.id = self._next_id
             self._next_id += 1
         self.entities_by_pos[(ent.x, ent.y)] = ent
-        self.entities_by_id[ent.id] = ent
+        if ent.id is not None:
+            self.entities_by_id[ent.id] = ent
 
     def get_entity_at(self, x: int, y: int) -> Optional[Entity]:
         return self.entities_by_pos.get((x, y))
@@ -73,7 +150,7 @@ class EntityManager:
         key = (ent.x, ent.y)
         if key in self.entities_by_pos:
             del self.entities_by_pos[key]
-        if getattr(ent, 'id', None) in self.entities_by_id:
+        if getattr(ent, 'id', None) is not None and ent.id in self.entities_by_id:
             del self.entities_by_id[ent.id]
 
     def load_from_level(self, level: List[str]):
@@ -274,79 +351,221 @@ class EntityManager:
         except Exception:
             pass
 
-        self.move_cooldown += 1
-        if self.move_cooldown < move_interval_frames:
-            return events
-        self.move_cooldown = 0
-
-        # iterate over a snapshot of positions to allow modifications
+        # Update enemies with improved AI - 不再使用全局冷却
         for (ex, ey), ent in list(self.entities_by_pos.items()):
             if not isinstance(ent, Enemy):
                 continue
-            px, py = player_pos
-
-            # If next step in current direction is player, attack
-            dx, dy = ent.dir
-            nx, ny = ex + dx, ey + dy
-            if (nx, ny) == (px, py):
-                events.append({'type': 'attack', 'pos': (px, py), 'damage': 1, 'attacker_id': ent.id})
-                continue
-
-            # simple chase behavior
-            chase_range = 6
-            dist = abs(px - ex) + abs(py - ey)
-            moved = False
-            if dist <= chase_range:
-                # prefer x move then y move
-                if px != ex:
-                    step_x = 1 if px > ex else -1
-                    tx, ty = ex + step_x, ey
-                    if 0 <= tx < WIDTH and 0 <= ty < HEIGHT and level[ty][tx] == '.':
-                        set_tile(level, ex, ey, '.')
-                        set_tile(level, tx, ty, 'E')
-                        # update pos map
-                        del self.entities_by_pos[(ex, ey)]
-                        ent.x, ent.y = tx, ty
-                        self.entities_by_pos[(tx, ty)] = ent
-                        moved = True
-                if not moved and py != ey:
-                    step_y = 1 if py > ey else -1
-                    tx, ty = ex, ey + step_y
-                    if 0 <= tx < WIDTH and 0 <= ty < HEIGHT and level[ty][tx] == '.':
-                        set_tile(level, ex, ey, '.')
-                        set_tile(level, tx, ty, 'E')
-                        del self.entities_by_pos[(ex, ey)]
-                        ent.x, ent.y = tx, ty
-                        self.entities_by_pos[(tx, ty)] = ent
-                        moved = True
-
-            # fallback: patrol move
-            if not moved:
-                dx, dy = ent.dir
-                nx, ny = ex + dx, ey + dy
-                can_move = 0 <= nx < WIDTH and 0 <= ny < HEIGHT and level[ny][nx] == '.'
-                if (nx, ny) == (px, py):
-                    events.append({'type': 'attack', 'pos': (px, py), 'damage': 1, 'attacker_id': ent.id})
-                elif can_move:
-                    set_tile(level, ex, ey, '.')
-                    set_tile(level, nx, ny, 'E')
-                    del self.entities_by_pos[(ex, ey)]
-                    ent.x, ent.y = nx, ny
-                    self.entities_by_pos[(nx, ny)] = ent
+            
+            # 每个敌人独立的移动冷却
+            ent.move_cooldown += 1
+            move_threshold = ent.enemy_stats.get('move_interval', 6)
+            
+            if ent.move_cooldown < move_threshold:
+                continue  # 还没到这个敌人的移动时间
+            
+            ent.move_cooldown = 0  # 重置冷却
+            
+            # Update AI state and get next action
+            action = self._update_enemy_ai(ent, level, player_pos, WIDTH, HEIGHT)
+            
+            # Process the action
+            if action['type'] == 'attack':
+                events.append({
+                    'type': 'attack', 
+                    'pos': action['target'], 
+                    'damage': ent.enemy_stats['damage'], 
+                    'attacker_id': ent.id
+                })
+            elif action['type'] == 'move':
+                success = self._move_entity(ent, action['target'], level, WIDTH, HEIGHT)
+                if not success:
+                    ent.stuck_counter += 1
+                    if ent.stuck_counter > 3:
+                        # 如果连续卡住，重新规划路径或改变状态
+                        ent.path = []
+                        ent.stuck_counter = 0
+                        if ent.state == 'chase':
+                            ent.state = 'patrol'
                 else:
-                    # debug: if enemy cannot move and has no free neighbor, print diagnostic
-                    neigh = {}
-                    for dxn, dyn in ((1, 0), (-1, 0), (0, 1), (0, -1)):
-                        txn, tyn = ex + dxn, ey + dyn
-                        if 0 <= tyn < HEIGHT and 0 <= txn < WIDTH:
-                            neigh[(txn, tyn)] = level[tyn][txn]
-                        else:
-                            neigh[(txn, tyn)] = None
-                    free_neighbors = [p for p, ch in neigh.items() if ch == '.']
-                    if not free_neighbors:
-                        print(
-                            f'[entity-debug] stuck enemy at ({ex},{ey}) tile={level[ey][ex]} neigh={neigh} hp={getattr(ent,"hp",None)} dir={ent.dir}'
-                        )
-                    ent.dir = (-dx, -dy)
+                    ent.stuck_counter = 0
 
         return events
+
+    def _update_enemy_ai(self, enemy: Enemy, level: List[str], player_pos: Tuple[int, int], WIDTH: int, HEIGHT: int) -> dict:
+        """更新敌人AI逻辑，返回行动决策"""
+        px, py = player_pos
+        ex, ey = enemy.x, enemy.y
+        
+        # 计算与玩家的距离
+        distance = abs(px - ex) + abs(py - ey)
+        chase_range = enemy.enemy_stats['chase_range']
+        
+        # 检查是否能立即攻击玩家（攻击判断优先，无冷却）
+        attack_positions = [(ex + dx, ey + dy) for dx, dy in [(0,1), (0,-1), (1,0), (-1,0)]]
+        if (px, py) in attack_positions:
+            return {'type': 'attack', 'target': (px, py)}
+        
+        # AI更新间隔控制（仅对移动和规划行为）
+        enemy.ai_cooldown += 1
+        ai_threshold = enemy.enemy_stats.get('ai_update_interval', 3)
+        
+        if enemy.ai_cooldown < ai_threshold:
+            # 没到AI更新时间，执行当前路径
+            if enemy.path:
+                next_pos = enemy.path[0]
+                return {'type': 'move', 'target': next_pos}
+            else:
+                return {'type': 'idle'}
+        
+        enemy.ai_cooldown = 0
+        
+        # 状态机逻辑
+        if distance <= chase_range and self._has_line_of_sight(enemy, player_pos, level, WIDTH, HEIGHT):
+            # 进入追击状态
+            enemy.state = 'chase'
+            enemy.last_player_pos = (px, py)
+            # 使用寻路算法计算到玩家的路径
+            enemy.path = self._find_path((ex, ey), (px, py), level, WIDTH, HEIGHT)
+        elif enemy.state == 'chase' and enemy.last_player_pos:
+            # 继续追击上次看到玩家的位置
+            if (ex, ey) == enemy.last_player_pos:
+                # 到达目标位置但没找到玩家，切换到巡逻
+                enemy.state = 'patrol'
+                enemy.last_player_pos = None
+                enemy.path = []
+            elif not enemy.path:
+                # 重新计算到上次位置的路径
+                enemy.path = self._find_path((ex, ey), enemy.last_player_pos, level, WIDTH, HEIGHT)
+        else:
+            # 巡逻状态
+            enemy.state = 'patrol'
+            if not enemy.path:
+                # 生成巡逻路径
+                enemy.path = self._generate_patrol_path(enemy, level, WIDTH, HEIGHT)
+        
+        # 执行路径中的下一步
+        if enemy.path:
+            next_pos = enemy.path.pop(0)
+            return {'type': 'move', 'target': next_pos}
+        else:
+            # 没有路径，随机移动
+            return self._get_random_move(enemy, level, WIDTH, HEIGHT)
+
+    def _has_line_of_sight(self, enemy: Enemy, target_pos: Tuple[int, int], level: List[str], WIDTH: int, HEIGHT: int) -> bool:
+        """检查敌人到目标是否有视线"""
+        ex, ey = enemy.x, enemy.y
+        tx, ty = target_pos
+        
+        # 简单的直线视线检查
+        dx = abs(tx - ex)
+        dy = abs(ty - ey)
+        steps = max(dx, dy)
+        
+        if steps == 0:
+            return True
+        
+        x_step = (tx - ex) / steps
+        y_step = (ty - ey) / steps
+        
+        for i in range(1, steps):
+            check_x = int(ex + x_step * i)
+            check_y = int(ey + y_step * i)
+            
+            if 0 <= check_x < WIDTH and 0 <= check_y < HEIGHT:
+                if level[check_y][check_x] in ['#', 'E']:  # 墙壁或其他敌人阻挡视线
+                    return False
+            else:
+                return False
+        
+        return True
+
+    def _find_path(self, start: Tuple[int, int], goal: Tuple[int, int], level: List[str], WIDTH: int, HEIGHT: int) -> List[Tuple[int, int]]:
+        """使用简单BFS寻路算法"""
+        if start == goal:
+            return []
+        
+        from collections import deque
+        queue = deque([(start, [])])
+        visited = {start}
+        
+        directions = [(0, 1), (0, -1), (1, 0), (-1, 0)]
+        max_path_length = 20  # 限制路径长度避免过长计算
+        
+        while queue:
+            (x, y), path = queue.popleft()
+            
+            if len(path) >= max_path_length:
+                continue
+            
+            for dx, dy in directions:
+                nx, ny = x + dx, y + dy
+                
+                if (nx, ny) == goal:
+                    return path + [(nx, ny)]
+                
+                if (nx, ny) not in visited and 0 <= nx < WIDTH and 0 <= ny < HEIGHT:
+                    tile = level[ny][nx]
+                    if tile in ['.', '@']:  # 可以移动的格子
+                        visited.add((nx, ny))
+                        queue.append(((nx, ny), path + [(nx, ny)]))
+        
+        return []  # 没找到路径
+
+    def _generate_patrol_path(self, enemy: Enemy, level: List[str], WIDTH: int, HEIGHT: int) -> List[Tuple[int, int]]:
+        """生成巡逻路径"""
+        ex, ey = enemy.x, enemy.y
+        patrol_range = enemy.enemy_stats['patrol_range']
+        
+        # 随机选择一个巡逻目标点
+        import random
+        attempts = 10
+        for _ in range(attempts):
+            target_x = ex + random.randint(-patrol_range, patrol_range)
+            target_y = ey + random.randint(-patrol_range, patrol_range)
+            
+            if (0 <= target_x < WIDTH and 0 <= target_y < HEIGHT and 
+                level[target_y][target_x] == '.' and (target_x, target_y) != (ex, ey)):
+                
+                path = self._find_path((ex, ey), (target_x, target_y), level, WIDTH, HEIGHT)
+                if path:
+                    return path
+        
+        return []
+
+    def _get_random_move(self, enemy: Enemy, level: List[str], WIDTH: int, HEIGHT: int) -> dict:
+        """获取随机移动方向"""
+        ex, ey = enemy.x, enemy.y
+        directions = [(0, 1), (0, -1), (1, 0), (-1, 0)]
+        
+        import random
+        random.shuffle(directions)
+        
+        for dx, dy in directions:
+            nx, ny = ex + dx, ey + dy
+            if 0 <= nx < WIDTH and 0 <= ny < HEIGHT and level[ny][nx] == '.':
+                return {'type': 'move', 'target': (nx, ny)}
+        
+        return {'type': 'idle'}
+
+    def _move_entity(self, entity: Entity, target_pos: Tuple[int, int], level: List[str], WIDTH: int, HEIGHT: int) -> bool:
+        """移动实体到目标位置"""
+        old_x, old_y = entity.x, entity.y
+        new_x, new_y = target_pos
+        
+        # 检查目标位置是否有效
+        if not (0 <= new_x < WIDTH and 0 <= new_y < HEIGHT):
+            return False
+        
+        if level[new_y][new_x] != '.':
+            return False
+        
+        # 更新地图
+        set_tile(level, old_x, old_y, '.')
+        set_tile(level, new_x, new_y, 'E')
+        
+        # 更新实体位置
+        del self.entities_by_pos[(old_x, old_y)]
+        entity.x, entity.y = new_x, new_y
+        self.entities_by_pos[(new_x, new_y)] = entity
+        
+        return True

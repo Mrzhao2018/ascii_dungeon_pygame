@@ -236,6 +236,11 @@ class Game:
 
     def _process_input_results(self, input_results, dt):
         """Process discrete input events"""
+        # Handle restart game
+        if input_results.get('restart_game'):
+            self._handle_restart_game()
+            return  # 重新开始后跳过其他输入处理
+
         # Handle debug mode toggle
         if input_results.get('toggle_debug_mode'):
             self._handle_debug_mode_toggle()
@@ -419,6 +424,11 @@ class Game:
 
     def _update_game_systems(self, dt):
         """Update all game systems"""
+        # 只在PLAYING状态下更新游戏系统
+        from game.state import GameStateEnum
+        if self.game_state.current_state != GameStateEnum.PLAYING:
+            return  # 非游戏状态下跳过游戏逻辑更新
+        
         # Update player
         prev_sprint_cd = getattr(self.player, 'sprint_cooldown', 0)
         self.player.update_timers(dt)
@@ -491,7 +501,9 @@ class Game:
 
                         if self.player.hp <= 0:
                             print('你死了。游戏结束。')
-                            self.running = False
+                            # 不再直接退出，而是切换到游戏结束状态
+                            from game.state import GameStateEnum
+                            self.game_state.set_game_state(GameStateEnum.GAME_OVER)
 
     def _process_floor_transitions(self):
         """Process floor transitions"""
@@ -540,6 +552,11 @@ class Game:
             # Recalculate FOV for new position
             if self.config.enable_fov:
                 self.player.update_fov(self.game_state.level)
+
+            # 刷新方位指示器，指向新楼层的出口
+            self.game_state.refresh_exit_indicator(self.config.tile_size)
+
+            self.logger.info(f"楼层转换完成：第 {self.game_state.floor_number} 层", "FLOOR")
 
     def _log_performance_stats(self):
         """Log performance statistics"""
@@ -601,3 +618,63 @@ class Game:
 
         except Exception as e:
             self.logger.error(f"Failed to toggle debug panel '{panel_name}'", "DEBUG", e)
+
+    def _handle_restart_game(self):
+        """处理游戏重新开始"""
+        try:
+            self.logger.info("重新开始游戏", "GAME")
+            
+            # 重置游戏状态
+            from game.state import GameStateEnum
+            self.game_state.set_game_state(GameStateEnum.PLAYING)
+            
+            # 重新初始化游戏
+            self._restart_game()
+            
+        except Exception as e:
+            self.logger.error("重新开始游戏失败", "GAME", e)
+
+    def _restart_game(self):
+        """重新初始化游戏的所有组件"""
+        # 重置游戏状态
+        self.game_state.__init__(self.config)  # 重新初始化状态
+        self.game_state.logger = self.logger   # 重新设置logger
+        
+        # 重新生成地图
+        level = self.floor_manager.generate_initial_level()
+        player_pos = self.floor_manager.find_player(level)
+        
+        if not player_pos:
+            self.logger.error("重新开始时未找到玩家位置", "GAME") 
+            return
+        
+        # 设置新关卡
+        self.game_state.set_level(level)
+        
+        # 重新创建玩家
+        from game.player import Player
+        self.player = Player(
+            player_pos[0],
+            player_pos[1],
+            hp=10,
+            move_cooldown=self.config.move_cooldown,
+            max_stamina=float(self.config.stamina_max) if self.config.stamina_max is not None else 100.0,
+            stamina_regen=float(self.config.stamina_regen) if self.config.stamina_regen is not None else 12.0,
+            sprint_cost=float(self.config.sprint_cost) if self.config.sprint_cost is not None else 35.0,
+            sprint_cooldown_ms=(
+                int(self.config.sprint_cooldown_ms) if self.config.sprint_cooldown_ms is not None else 800
+            ),
+            sprint_multiplier=(
+                float(self.config.sprint_multiplier) if self.config.sprint_multiplier is not None else 0.6
+            ),
+            sight_radius=int(self.config.sight_radius) if self.config.sight_radius is not None else 6,
+        )
+        
+        # 重新设置关卡（实体和NPC）
+        self._setup_initial_level()
+        
+        # 重新初始化其他系统
+        if self.config.enable_fov and self.player:
+            self.player.update_fov(self.game_state.level)
+        
+        self.logger.info("游戏重新开始完成", "GAME")

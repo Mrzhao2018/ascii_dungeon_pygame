@@ -1,6 +1,7 @@
 import pygame
 import os
 from typing import Any, Dict, List, Optional, Set, TYPE_CHECKING, Tuple
+from enum import Enum
 
 """
 Game state management
@@ -11,6 +12,13 @@ if TYPE_CHECKING:
     from game.logging import Logger
 
 
+class GameStateEnum(Enum):
+    """游戏状态枚举"""
+    PLAYING = "playing"         # 正常游戏状态
+    GAME_OVER = "game_over"     # 游戏结束状态
+    RESTART = "restart"         # 重新开始状态
+
+
 class GameState:
     """Manages the overall game state"""
 
@@ -19,6 +27,9 @@ class GameState:
 
         # Logger (will be set by Game class)
         self.logger: Optional['Logger'] = None
+
+        # 游戏状态
+        self.current_state = GameStateEnum.PLAYING
 
         # Level state
         self.level = []
@@ -234,3 +245,43 @@ class GameState:
             ox = oy = 0
 
         return ox, oy
+
+    def set_game_state(self, new_state: GameStateEnum):
+        """切换游戏状态"""
+        old_state = self.current_state
+        self.current_state = new_state
+        if self.logger:
+            self.logger.info(f"游戏状态切换: {old_state.value} -> {new_state.value}", "STATE")
+
+    def is_playing(self) -> bool:
+        """检查是否在游戏中"""
+        return self.current_state == GameStateEnum.PLAYING
+
+    def is_game_over(self) -> bool:
+        """检查是否游戏结束"""
+        return self.current_state == GameStateEnum.GAME_OVER
+
+    def is_restart(self) -> bool:
+        """检查是否需要重新开始"""
+        return self.current_state == GameStateEnum.RESTART
+
+    def refresh_exit_indicator(self, tile_size: int):
+        """刷新方位指示器，指向新楼层的出口"""
+        # 如果当前没有开启指示器，则不需要刷新
+        if self.pending_target is None:
+            return
+        
+        # 重新计算出口位置
+        self.compute_exit_pos()
+        
+        # 如果找到了新的出口位置，更新指示器目标
+        if self.exit_pos is not None:
+            ex, ey = self.exit_pos
+            self.pending_target = (ex * tile_size + tile_size // 2, ey * tile_size + tile_size // 2)
+            if self.logger:
+                self.logger.debug(f"方位指示器已刷新，指向新出口位置: {self.exit_pos}", "INDICATOR")
+        else:
+            # 如果新楼层没有出口，隐藏指示器
+            self.pending_target = None
+            if self.logger:
+                self.logger.warning("新楼层没有出口，已隐藏方位指示器", "INDICATOR")

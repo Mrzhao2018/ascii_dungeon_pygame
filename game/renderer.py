@@ -55,6 +55,16 @@ class Renderer:
 
     def render_frame(self, player, entity_mgr, floating_texts, npcs=None):
         """Render a complete frame"""
+        from game.state import GameStateEnum
+        
+        # 根据游戏状态选择渲染方式
+        if self.game_state.current_state == GameStateEnum.GAME_OVER:
+            self._render_game_over_screen()
+        else:
+            self._render_playing_game(player, entity_mgr, floating_texts, npcs)
+
+    def _render_playing_game(self, player, entity_mgr, floating_texts, npcs=None):
+        """渲染正常游戏界面"""
         # Get screen shake offset
         ox, oy = self.game_state.get_screen_shake_offset()
 
@@ -87,6 +97,51 @@ class Renderer:
             self.debug_overlay.update_debug_mode()
             self.debug_overlay.render(self.screen, self.game_state, player, entity_mgr, npcs)
 
+        pygame.display.flip()
+
+    def _render_game_over_screen(self):
+        """渲染游戏结束界面"""
+        # 清屏 - 使用深红色背景表示游戏结束
+        self.screen.fill((20, 0, 0))
+        
+        # 计算屏幕中心
+        center_x = self.view_px_w // 2
+        center_y = self.view_px_h // 2
+        
+        # 渲染标题 "你死了"
+        title_text = "你死了！"
+        title_color = (255, 50, 50)  # 红色
+        title_surface = self.font.render(title_text, True, title_color)
+        title_rect = title_surface.get_rect(center=(center_x, center_y - 60))
+        self.screen.blit(title_surface, title_rect)
+        
+        # 渲染操作提示
+        restart_text = "按 R 重新开始"
+        restart_color = (200, 200, 200)  # 灰白色
+        restart_surface = self.font.render(restart_text, True, restart_color)
+        restart_rect = restart_surface.get_rect(center=(center_x, center_y + 20))
+        self.screen.blit(restart_surface, restart_rect)
+        
+        quit_text = "按 ESC 退出游戏"
+        quit_color = (150, 150, 150)  # 较深灰色
+        quit_surface = self.font.render(quit_text, True, quit_color)
+        quit_rect = quit_surface.get_rect(center=(center_x, center_y + 60))
+        self.screen.blit(quit_surface, quit_rect)
+        
+        # 添加装饰性元素 - 骷髅符号
+        skull_symbols = ["💀", "☠️"]
+        try:
+            skull_text = skull_symbols[0]  # 使用第一个骷髅符号
+            skull_surface = self.font.render(skull_text, True, (255, 100, 100))
+            skull_rect = skull_surface.get_rect(center=(center_x, center_y - 120))
+            self.screen.blit(skull_surface, skull_rect)
+        except Exception:
+            # 如果无法渲染emoji，使用ASCII字符
+            skull_text = "X_X"
+            skull_surface = self.font.render(skull_text, True, (255, 100, 100))
+            skull_rect = skull_surface.get_rect(center=(center_x, center_y - 120))
+            self.screen.blit(skull_surface, skull_rect)
+        
         pygame.display.flip()
 
     def _render_level_tiles(self, x0: int, y0: int, x1: int, y1: int, entity_mgr, player, ox: int, oy: int):

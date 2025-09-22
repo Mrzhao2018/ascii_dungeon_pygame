@@ -12,7 +12,7 @@ class GameConfig:
 
     def __init__(self):
         """Initialize game configuration"""
-        self.config_file = None
+        self.config_file = ConfigFile()
         self._load_config_file()
         self.parse_arguments()
         self._save_config_if_requested()
@@ -335,6 +335,7 @@ PyGame 字符地牢探索游戏 - 命令行参数
   K                       调试信息
   F12                     切换调试模式
   1-5                     切换调试面板 (调试模式下)
+  R                       重新开始 (死亡后)
   Esc                     退出
 """
         print(help_text)
