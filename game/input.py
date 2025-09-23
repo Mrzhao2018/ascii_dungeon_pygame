@@ -182,6 +182,11 @@ class InputHandler:
         """Handle continuous key states (movement, sprint, tab)"""
         result: Dict[str, Any] = {}
 
+        # 在非 PLAYING 状态（例如 PAUSED、MAIN_MENU、GAME_OVER）下，直接不处理连续输入
+        from game.state import GameStateEnum
+        if self.game_state.current_state != GameStateEnum.PLAYING:
+            return result
+
         # Skip during dialog or floor transition
         if self.game_state.dialog_active or self.game_state.floor_transition:
             return result

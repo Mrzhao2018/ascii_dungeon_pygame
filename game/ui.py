@@ -3,6 +3,32 @@ import pygame
 import math
 from typing import Dict, Optional, Tuple, Callable, Any
 
+
+def add_floating_text(game_state, text: str, x_px: int, y_px: int, time_ms: int = 1000, alpha: int = 255, **flags):
+    """Add a generic floating text entry with optional flags (damage, experience, level_up, floor_complete, etc.)."""
+    entry = {
+        'ent_id': flags.pop('ent_id', None),
+        'text': text,
+        'time': time_ms,
+        'alpha': alpha,
+    }
+    entry.update(flags)
+    # Support legacy keys 'x'/'y' or 'last_pos'
+    if 'last_pos' in flags:
+        entry['last_pos'] = flags['last_pos']
+    else:
+        entry['x'] = x_px
+        entry['y'] = y_px
+    game_state.floating_texts.append(entry)
+
+
+def add_exp_text(game_state, text: str, x_px: int, y_px: int):
+    add_floating_text(game_state, text, x_px, y_px, time_ms=1000, experience=True)
+
+
+def add_levelup_text(game_state, text: str, x_px: int, y_px: int):
+    add_floating_text(game_state, text, x_px, y_px, time_ms=2000, level_up=True)
+
 # 简单字体缓存，避免重复创建 Font 对象
 # Font cache to avoid reloading fonts
 _font_cache: Dict[Tuple[str, int], pygame.font.Font] = {}

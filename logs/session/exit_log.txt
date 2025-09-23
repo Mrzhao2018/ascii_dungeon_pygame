@@ -118,3 +118,39 @@
 [28135] Generating floor 2 with seed 12347, size 80x30
 [28149] Wrote floor snapshot: e:\pygame\game\..\data\debug\maps\last_level_floor_2.txt
 [28150] Wrote post-entity floor snapshot: e:\pygame\game\..\data\debug\maps\last_level_floor_2_after_entities.txt
+[29446] Floor transition triggered: floor 2, seed 12347
+[30518] Generating floor 2 with seed 12347, size 80x30
+[30533] Wrote floor snapshot: E:\pygame\game\..\data\debug\maps\last_level_floor_2.txt
+[30534] Wrote post-entity floor snapshot: E:\pygame\game\..\data\debug\maps\last_level_floor_2_after_entities.txt
+[10603] Floor transition triggered: floor 2, seed 12347
+[11676] Generating floor 2 with seed 12347, size 80x30
+[11688] Wrote floor snapshot: E:\pygame\game\..\data\debug\maps\last_level_floor_2.txt
+[11688] Wrote post-entity floor snapshot: E:\pygame\game\..\data\debug\maps\last_level_floor_2_after_entities.txt
+[21098] Floor transition triggered: floor 3, seed 12348
+[22177] Generating floor 3 with seed 12348, size 80x30
+[22190] Wrote floor snapshot: E:\pygame\game\..\data\debug\maps\last_level_floor_3.txt
+[22191] Wrote post-entity floor snapshot: E:\pygame\game\..\data\debug\maps\last_level_floor_3_after_entities.txt
+[22933] Floor transition triggered: floor 2, seed 12347
+[24007] Generating floor 2 with seed 12347, size 80x30
+[24019] Wrote floor snapshot: E:\pygame\game\..\data\debug\maps\last_level_floor_2.txt
+[24020] Wrote post-entity floor snapshot: E:\pygame\game\..\data\debug\maps\last_level_floor_2_after_entities.txt
+[30487] Floor transition triggered: floor 3, seed 12348
+[31559] Generating floor 3 with seed 12348, size 80x30
+[31572] Wrote floor snapshot: E:\pygame\game\..\data\debug\maps\last_level_floor_3.txt
+[31572] Wrote post-entity floor snapshot: E:\pygame\game\..\data\debug\maps\last_level_floor_3_after_entities.txt
+[40229] Floor transition triggered: floor 4, seed 12349
+[41303] Generating floor 4 with seed 12349, size 80x30
+[41326] Wrote floor snapshot: E:\pygame\game\..\data\debug\maps\last_level_floor_4.txt
+[41327] Wrote post-entity floor snapshot: E:\pygame\game\..\data\debug\maps\last_level_floor_4_after_entities.txt
+[67200] Floor transition triggered: floor 5, seed 12350
+[68273] Generating floor 5 with seed 12350, size 80x30
+[68286] Wrote floor snapshot: E:\pygame\game\..\data\debug\maps\last_level_floor_5.txt
+[68287] Wrote post-entity floor snapshot: E:\pygame\game\..\data\debug\maps\last_level_floor_5_after_entities.txt
+[77671] Floor transition triggered: floor 6, seed 12351
+[78749] Generating floor 6 with seed 12351, size 80x30
+[78762] Wrote floor snapshot: E:\pygame\game\..\data\debug\maps\last_level_floor_6.txt
+[78763] Wrote post-entity floor snapshot: E:\pygame\game\..\data\debug\maps\last_level_floor_6_after_entities.txt
+[14360] Floor transition triggered: floor 2, seed 12347
+[15428] Generating floor 2 with seed 12347, size 80x30
+[15440] Wrote floor snapshot: E:\pygame\game\..\data\debug\maps\last_level_floor_2.txt
+[15440] Wrote post-entity floor snapshot: E:\pygame\game\..\data\debug\maps\last_level_floor_2_after_entities.txt

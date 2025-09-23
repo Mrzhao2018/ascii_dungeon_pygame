@@ -1,18 +1,28 @@
 import sys
 import pygame
 import time
-from typing import Set
+from typing import Optional, Dict, List, cast
 from game.config import GameConfig
 from game.state import GameState
 from game.input import InputHandler
 from game.floors import FloorManager
 from game.renderer import Renderer
 from game.player import Player
-from game.logging import Logger, ErrorHandler, create_performance_timer
+from game.logging import Logger, ErrorHandler
 from game.performance import PerformanceOptimizer
+from game.debug_controls import toggle_debug_mode, toggle_panel
+from game.perf_controller import log_performance_stats
 from game.memory import MemoryOptimizer, MemoryMonitor, SmartCacheManager
 from game.error_handling import get_global_error_handler
-from game import entities, dialogs as dialogs_mod, audio as audio_mod
+from game import entities
+from game.audio_controller import initialize_audio
+from game.session_controller import (
+    initialize_game_world,
+    setup_initial_level,
+    restart_game as session_restart_game,
+    start_game_if_needed,
+)
+from game.transition_controller import apply_floor_transition, log_transition_triggered, log_transition_summary
 
 """
 Main game class that orchestrates all game systems
@@ -80,12 +90,17 @@ class Game:
                 self.renderer.set_debug_clock(self.clock)
 
             # Entity and interaction state
-            self.entity_mgr = None
-            self.npcs = {}
-            self.player = None  # Will be created when game starts
+            self.entity_mgr: Optional[entities.EntityManager] = None
+            self.npcs: Dict = {}
+            self.player: Optional[Player] = None  # Will be created when game starts
 
             # Don't setup initial level - wait for game start
             # self._setup_initial_level() will be called from _handle_start_game()
+
+            # Sounds (annotated for type clarity)
+            self.hit_sound: Optional[pygame.mixer.Sound]
+            self.sprint_sound: Optional[pygame.mixer.Sound]
+            self.sprint_ready_sound: Optional[pygame.mixer.Sound]
 
             self.logger.info("Game initialization completed successfully", "GAME")
 
@@ -94,65 +109,29 @@ class Game:
             raise
 
     def _initialize_game_world(self):
-        """Initialize the game world (level, player, etc.)"""
-        # Generate initial level
-        level = self.floor_manager.generate_initial_level()
-        self.game_state.set_level(level)
-
-        # Find player position
-        player_pos = self.floor_manager.find_player(level)
-        if not player_pos:
+        """Initialize the game world (level, player, etc.) via session controller."""
+        player = initialize_game_world(self.config, self.game_state, self.floor_manager)
+        if not player:
             print("未找到玩家 '@'，请在地图中放置玩家")
             pygame.quit()
             sys.exit(1)
-
-        # Create player
-        self.player = Player(
-            player_pos[0],
-            player_pos[1],
-            hp=10,
-            move_cooldown=self.config.move_cooldown,
-            max_stamina=float(self.config.stamina_max) if self.config.stamina_max is not None else 100.0,
-            stamina_regen=float(self.config.stamina_regen) if self.config.stamina_regen is not None else 12.0,
-            sprint_cost=float(self.config.sprint_cost) if self.config.sprint_cost is not None else 35.0,
-            sprint_cooldown_ms=(
-                int(self.config.sprint_cooldown_ms) if self.config.sprint_cooldown_ms is not None else 800
-            ),
-            sprint_multiplier=(
-                float(self.config.sprint_multiplier) if self.config.sprint_multiplier is not None else 0.6
-            ),
-            sight_radius=int(self.config.sight_radius) if self.config.sight_radius is not None else 6,
-        )
+        self.player = player
 
     def _setup_initial_level(self):
         """Setup the initial level with entities and NPCs"""
-        self.entity_mgr, self.npcs = self.floor_manager.setup_level(self.game_state.level)
-        self.floor_manager.write_initial_snapshot(self.game_state.level)
-
-        # Initialize camera
-        self.game_state.cam_x = self.player.x * self.config.tile_size - self.renderer.view_px_w // 2
-        self.game_state.cam_y = self.player.y * self.config.tile_size - self.renderer.view_px_h // 2
-        self.game_state.cam_x = max(
-            0,
-            min(self.game_state.cam_x, max(0, self.game_state.width * self.config.tile_size - self.renderer.view_px_w)),
+        # Player must be initialized by _initialize_game_world before calling this
+        if self.player is None:
+            return
+        self.entity_mgr, self.npcs = setup_initial_level(
+            self.config, self.game_state, self.renderer, self.floor_manager, self.player
         )
-        self.game_state.cam_y = max(
-            0,
-            min(
-                self.game_state.cam_y, max(0, self.game_state.height * self.config.tile_size - self.renderer.view_px_h)
-            ),
-        )
-
-        # Initialize FOV if enabled
-        if self.config.enable_fov:
-            self.player.update_fov(self.game_state.level)
 
     def _initialize_audio(self):
-        """Initialize audio system"""
-        sound_enabled = audio_mod.init_audio()
-        self.hit_sound = audio_mod.load_hit_sound() if sound_enabled else None
-        self.sprint_sound = audio_mod.load_sprint_sound() if sound_enabled else None
-        self.sprint_ready_sound = audio_mod.load_sprint_ready_sound() if sound_enabled else None
+        """Initialize audio system via audio controller"""
+        sound_enabled, hit, sprint, sprint_ready = initialize_audio(self.logger)
+        self.hit_sound = hit
+        self.sprint_sound = sprint
+        self.sprint_ready_sound = sprint_ready
         print(f'[Game] sound_enabled={sound_enabled} hit_sound_present={self.hit_sound is not None}')
 
     def run(self):
@@ -165,17 +144,14 @@ class Game:
                 # Start performance monitoring for this frame
                 self.performance_optimizer.start_frame()
 
-                frame_start = pygame.time.get_ticks()
-                render_start = time.perf_counter()
+                # Frame timing anchors (collected by performance monitor already)
 
                 # Tick clock and measure frame time
                 dt = self.clock.tick(self.config.fps)
 
                 # Handle events
-                event_start = time.perf_counter()
                 events = pygame.event.get()
                 input_results = self.error_handler.safe_call(self.input_handler.handle_events, "input_events", events)
-                event_time = (time.perf_counter() - event_start) * 1000
 
                 if input_results and input_results.get('quit'):
                     self.logger.info("Quit requested by user", "GAME")
@@ -236,7 +212,7 @@ class Game:
 
                 # Log performance statistics every 300 frames (about 10 seconds at 30 FPS)
                 if frame_count % 300 == 0:
-                    self._log_performance_stats()
+                    log_performance_stats(self.performance_optimizer, self.logger, self.config, self.game_state)
 
         except KeyboardInterrupt:
             self.logger.info("Game interrupted by user (Ctrl+C)", "GAME")
@@ -274,11 +250,17 @@ class Game:
 
         # Handle debug mode toggle
         if input_results.get('toggle_debug_mode'):
-            self._handle_debug_mode_toggle()
+            toggle_debug_mode(self.config, self.renderer, self.logger, self.game_state)
 
         # Handle debug panel toggle
         if input_results.get('toggle_debug_panel'):
-            self._handle_debug_panel_toggle(input_results.get('toggle_debug_panel'))
+            toggle_panel(
+                self.renderer,
+                input_results.get('toggle_debug_panel'),
+                self.logger,
+                self.game_state,
+                self.config,
+            )
 
         # 以下操作需要玩家存在
         if self.player is None:
@@ -297,16 +279,15 @@ class Game:
             self._handle_debug()
 
         # Handle sprint sound
-        if input_results.get('sprint_sound') and self.sprint_sound:
-            try:
-                self.sprint_sound.play()
-            except Exception:
-                pass
+        if input_results.get('sprint_sound'):
+            from game.audio_controller import play_safe
+            play_safe(self.sprint_sound)
 
     def _process_continuous_input(self, continuous_input, dt):
         """Process continuous input (movement, etc.)"""
-        # 检查玩家是否存在
-        if self.player is None:
+        # 检查状态与玩家是否存在：仅在 PLAYING 状态下处理连续输入与体力更新
+        from game.state import GameStateEnum
+        if self.game_state.current_state != GameStateEnum.PLAYING or self.player is None:
             return
             
         movement = continuous_input.get('continuous_movement')
@@ -321,11 +302,13 @@ class Game:
             if moved_result.get('moved'):
                 self._handle_movement_result(moved_result, dt)
         else:
-            # No movement: passive stamina regen
+            # No movement: passive stamina regen（仅在 PLAYING 状态下才会走到这里）
             self.player.passive_stamina_update(dt)
 
     def _handle_movement_result(self, moved_result, dt):
         """Handle the result of player movement"""
+        if self.player is None:
+            return
         px, py = moved_result.get('old')
         nx, ny = moved_result.get('new')
         target = moved_result.get('target')
@@ -346,6 +329,8 @@ class Game:
 
     def _trigger_floor_transition(self):
         """Trigger a floor transition"""
+        if self.player is None:
+            return
         # 给予楼层完成经验奖励
         from .experience import EXPERIENCE_CONFIG
         floor_exp = EXPERIENCE_CONFIG["exp_sources"]["floor_completion"]
@@ -353,28 +338,24 @@ class Game:
         
         # 添加楼层完成经验提示
         px, py = self.player.x, self.player.y
-        self.game_state.floating_texts.append(
-            {
-                'ent_id': None,
-                'text': f'Floor Complete! +{floor_exp} EXP',
-                'time': 2000,
-                'alpha': 255,
-                'floor_complete': True,
-                'last_pos': (px * self.config.tile_size, py * self.config.tile_size - 30),
-            }
+        from game.ui import add_floating_text, add_levelup_text
+        add_floating_text(
+            self.game_state,
+            f'Floor Complete! +{floor_exp} EXP',
+            0,
+            0,
+            time_ms=2000,
+            floor_complete=True,
+            last_pos=(px * self.config.tile_size, py * self.config.tile_size - 30),
         )
         
         # 如果升级了，添加升级提示
         if leveled_up:
-            self.game_state.floating_texts.append(
-                {
-                    'ent_id': None,
-                    'text': f'LEVEL UP! Lv.{self.player.level}',
-                    'time': 2000,
-                    'alpha': 255,
-                    'level_up': True,
-                    'last_pos': (px * self.config.tile_size, py * self.config.tile_size - 50),
-                }
+            add_levelup_text(
+                self.game_state,
+                f'LEVEL UP! Lv.{self.player.level}',
+                px * self.config.tile_size,
+                py * self.config.tile_size - 50,
             )
         
         # 记录楼层完成
@@ -394,12 +375,13 @@ class Game:
                 gen_seed = int(time.time() * 1000)
 
         self.game_state.start_floor_transition(self.game_state.floor_number, gen_seed)
-        self.game_state.write_exit_log(
-            f'Floor transition triggered: floor {self.game_state.floor_number}, seed {gen_seed}'
-        )
+        # 统一记录楼层转换触发日志
+        log_transition_triggered(self.logger, self.game_state.floor_number, gen_seed)
 
     def _handle_interaction(self):
         """Handle interaction with NPCs"""
+        if self.player is None:
+            return
         px, py = self.player.x, self.player.y
         neighbors = [(px + 1, py), (px - 1, py), (px, py + 1), (px, py - 1)]
 
@@ -431,6 +413,8 @@ class Game:
 
     def _handle_attack(self):
         """Handle player attack"""
+        if self.player is None:
+            return
         px, py = self.player.x, self.player.y
         neighbors = [(px + 1, py), (px - 1, py), (px, py + 1), (px, py - 1)]
 
@@ -457,11 +441,8 @@ class Game:
 
                 self.game_state.add_screen_shake()
 
-                if self.hit_sound:
-                    try:
-                        self.hit_sound.play()
-                    except Exception:
-                        pass
+                from game.audio_controller import play_safe
+                play_safe(self.hit_sound)
 
                 if ent.hp <= 0:
                     # 计算经验奖励
@@ -473,28 +454,22 @@ class Game:
                     leveled_up = self.player.gain_experience(exp_reward)
                     
                     # 添加经验获取提示
-                    self.game_state.floating_texts.append(
-                        {
-                            'ent_id': None,  # 不绑定到实体
-                            'text': f'+{exp_reward} EXP',
-                            'time': 1000,
-                            'alpha': 255,
-                            'experience': True,
-                            'last_pos': (nx * self.config.tile_size, ny * self.config.tile_size + 20),
-                        }
+                    from game.ui import add_exp_text
+                    add_exp_text(
+                        self.game_state,
+                        f'+{exp_reward} EXP',
+                        nx * self.config.tile_size,
+                        ny * self.config.tile_size + 20,
                     )
                     
                     # 如果升级了，添加升级提示
                     if leveled_up:
-                        self.game_state.floating_texts.append(
-                            {
-                                'ent_id': None,
-                                'text': f'LEVEL UP! Lv.{self.player.level}',
-                                'time': 2000,
-                                'alpha': 255,
-                                'level_up': True,
-                                'last_pos': (nx * self.config.tile_size, ny * self.config.tile_size - 20),
-                            }
+                        from game.ui import add_levelup_text
+                        add_levelup_text(
+                            self.game_state,
+                            f'LEVEL UP! Lv.{self.player.level}',
+                            nx * self.config.tile_size,
+                            ny * self.config.tile_size - 20,
                         )
                     
                     # 记录击败敌人（用于调试和统计）
@@ -537,9 +512,7 @@ class Game:
         """Update all game systems"""
         # 只在PLAYING状态下更新游戏系统，暂停状态下不更新
         from game.state import GameStateEnum
-        if (self.game_state.current_state != GameStateEnum.PLAYING or 
-            self.game_state.current_state == GameStateEnum.PAUSED or 
-            self.player is None):
+        if (self.game_state.current_state != GameStateEnum.PLAYING or self.player is None):
             return  # 非游戏状态、暂停状态或玩家未初始化时跳过游戏逻辑更新
         
         # Update player
@@ -548,11 +521,8 @@ class Game:
 
         # Play sprint ready sound
         if prev_sprint_cd > 0 and self.player.sprint_cooldown == 0:
-            if self.sprint_ready_sound:
-                try:
-                    self.sprint_ready_sound.play()
-                except Exception:
-                    pass
+            from game.audio_controller import play_safe
+            play_safe(self.sprint_ready_sound)
 
         # Update entities
         if self.entity_mgr:
@@ -574,6 +544,8 @@ class Game:
 
     def _process_entity_events(self, events):
         """Process events from entity updates"""
+        if self.player is None:
+            return
         for ev in events:
             if ev.get('type') == 'attack':
                 px_ev, py_ev = ev.get('pos')
@@ -600,17 +572,20 @@ class Game:
                         else:
                             px_scr = px_ev * self.config.tile_size
                             py_scr = py_ev * self.config.tile_size
-                            self.game_state.floating_texts.append(
-                                {'x': px_scr, 'y': py_scr, 'text': f'-{dmg}', 'time': 700, 'alpha': 255, 'damage': dmg}
+                            from game.ui import add_floating_text
+                            add_floating_text(
+                                self.game_state,
+                                f'-{dmg}',
+                                px_scr,
+                                py_scr,
+                                time_ms=700,
+                                damage=dmg,
                             )
 
                         self.game_state.add_screen_shake()
 
-                        if self.hit_sound:
-                            try:
-                                self.hit_sound.play()
-                            except Exception:
-                                pass
+                        from game.audio_controller import play_safe
+                        play_safe(self.hit_sound)
 
                         if self.player.hp <= 0:
                             print('你死了。游戏结束。')
@@ -620,129 +595,47 @@ class Game:
 
     def _process_floor_transitions(self):
         """Process floor transitions"""
+        if self.player is None:
+            return
         result = self.floor_manager.process_floor_transition()
         if result and result[0] is not None:
             level, entity_mgr, npcs, new_pos = result
+            # Use transition controller to apply camera/FOV/indicator updates
+            if entity_mgr is not None:
+                entity_mgr_applied, npcs_dict = apply_floor_transition(
+                    self.config,
+                    self.game_state,
+                    self.renderer,
+                    self.player,
+                    cast(List[str], level),
+                    entity_mgr,
+                    npcs,
+                    new_pos,
+                )
+                self.entity_mgr = entity_mgr_applied
+                self.npcs = npcs_dict
 
-            # Type safety check
-            if level is None:
-                return
-
-            # Update game state
-            self.game_state.set_level(level)
-            self.entity_mgr = entity_mgr
-            self.npcs = npcs
-
-            # Clear FOV exploration for new floor
-            if self.config.enable_fov:
-                self.player.clear_exploration()
-
-            # Update player position
-            if new_pos:
-                self.player.x, self.player.y = new_pos
-
-            # Update renderer view size
-            self.renderer.update_view_size(self.game_state.width, self.game_state.height)
-
-            # Reset camera
-            self.game_state.cam_x = self.player.x * self.config.tile_size - self.renderer.view_px_w // 2
-            self.game_state.cam_y = self.player.y * self.config.tile_size - self.renderer.view_px_h // 2
-            self.game_state.cam_x = max(
-                0,
-                min(
-                    self.game_state.cam_x,
-                    max(0, self.game_state.width * self.config.tile_size - self.renderer.view_px_w),
-                ),
-            )
-            self.game_state.cam_y = max(
-                0,
-                min(
-                    self.game_state.cam_y,
-                    max(0, self.game_state.height * self.config.tile_size - self.renderer.view_px_h),
-                ),
-            )
-
-            # Recalculate FOV for new position
-            if self.config.enable_fov:
-                self.player.update_fov(self.game_state.level)
-
-            # 刷新方位指示器，指向新楼层的出口
-            self.game_state.refresh_exit_indicator(self.config.tile_size)
-
-            self.logger.info(f"楼层转换完成：第 {self.game_state.floor_number} 层", "FLOOR")
-
-    def _log_performance_stats(self):
-        """Log performance statistics"""
-        # Use the new performance monitor's summary
-        self.performance_optimizer.monitor.log_performance_summary()
-
-        # Check for performance issues
-        stats = self.performance_optimizer.get_stats()
-        if stats.get('drop_rate', 0) > 5:  # More than 5% dropped frames
-            self.logger.warning(f"High frame drop rate: {stats['drop_rate']:.1f}%", "PERFORMANCE")
-
-        if stats.get('avg_frame_time', 0) > 40:  # Worse than 25 FPS
-            self.logger.warning(f"Poor frame time: {stats['avg_frame_time']:.1f}ms", "PERFORMANCE")
-
-        # Apply optimizations if performance is poor
-        if self.config.debug_mode and (stats.get('drop_rate', 0) > 10 or stats.get('avg_frame_time', 0) > 50):
-            self.logger.info("Applying performance optimizations...", "PERFORMANCE")
-            self.performance_optimizer.optimize_rendering(self.config, self.game_state, pygame.display.get_surface())
-
-        # Check for performance issues
-        frame_stats = self.logger.get_performance_stats("frame_total")
-        if frame_stats and frame_stats['avg'] > 33.0:  # More than 33ms per frame (less than 30 FPS)
-            self.logger.warning(
-                f"Performance issue detected: average frame time {frame_stats['avg']:.1f}ms", "PERFORMANCE"
-            )
+            # 统一记录楼层转换完成摘要
+            log_transition_summary(self.logger, self.game_state, self.entity_mgr)
 
     def _handle_debug_mode_toggle(self):
-        """Handle F12 debug mode toggle"""
-        try:
-            new_state = self.config.toggle_debug_mode()
-
-            # Update debug overlay
-            if hasattr(self.renderer, 'debug_overlay') and self.renderer.debug_overlay:
-                self.renderer.debug_overlay.update_debug_mode()
-
-            # Update logger debug mode
-            self.logger.debug_enabled = new_state
-
-            # Log the state change
-            status_message = f"Debug mode {'enabled' if new_state else 'disabled'}"
-            if new_state:
-                self.logger.info(f"{status_message} - Press 1-5 to toggle panels, F12 to disable", "DEBUG")
-                self.game_state.game_log(f"Debug mode enabled (F12 to disable)")
-            else:
-                self.logger.info(f"{status_message}", "DEBUG")
-                self.game_state.game_log(f"Debug mode disabled")
-
-        except Exception as e:
-            self.logger.error("Failed to toggle debug mode", "DEBUG", e)
+        """Deprecated: kept for compatibility; use debug_controls.toggle_debug_mode instead."""
+        toggle_debug_mode(self.config, self.renderer, self.logger, self.game_state)
 
     def _handle_debug_panel_toggle(self, panel_name):
-        """Handle debug panel toggle (1-5 keys)"""
-        try:
-            if hasattr(self.renderer, 'debug_overlay') and self.renderer.debug_overlay and self.config.debug_mode:
-                self.renderer.debug_overlay.toggle_panel(panel_name)
-                panel_status = "visible" if panel_name in self.renderer.debug_overlay.visible_panels else "hidden"
-                self.logger.debug(f"Debug panel '{panel_name}' is now {panel_status}", "DEBUG")
-                self.game_state.game_log(f"Debug panel '{panel_name}': {panel_status}")
-
-        except Exception as e:
-            self.logger.error(f"Failed to toggle debug panel '{panel_name}'", "DEBUG", e)
+        """Deprecated: kept for compatibility; use debug_controls.toggle_panel instead."""
+        toggle_panel(self.renderer, panel_name, self.logger, self.game_state, self.config)
 
     def _handle_restart_game(self):
         """处理游戏重新开始"""
         try:
             self.logger.info("重新开始游戏", "GAME")
-            
-            # 重置游戏状态
             from game.state import GameStateEnum
             self.game_state.set_game_state(GameStateEnum.PLAYING)
-            
-            # 重新初始化游戏
-            self._restart_game()
+            # 使用会话控制器进行完整重启
+            self.game_state, self.player, self.entity_mgr, self.npcs = session_restart_game(
+                self.config, self.logger, self.floor_manager, self.renderer, self.game_state
+            )
             
         except Exception as e:
             self.logger.error("重新开始游戏失败", "GAME", e)
@@ -752,63 +645,28 @@ class Game:
         try:
             self.logger.info("从主菜单开始游戏", "GAME")
             
-            # 确保游戏世界已初始化
-            if self.game_state.level is None or len(self.game_state.level) == 0:
-                self._initialize_game_world()
-                self._setup_initial_level()
-            
-            # 切换到游戏状态
-            from game.state import GameStateEnum
-            self.game_state.set_game_state(GameStateEnum.PLAYING)
-            
+            # 通过会话控制器确保初始化并进入游戏
+            player, entity_mgr, npcs = start_game_if_needed(
+                self.config, self.logger, self.game_state, self.floor_manager, self.renderer
+            )
+            if player is not None:
+                # 若首次启动，这里需要把新实例赋回
+                if self.player is None:
+                    self.player = player
+                if entity_mgr is not None:
+                    self.entity_mgr = entity_mgr
+                # 保证为字典类型
+                self.npcs = npcs or {}
             self.logger.info("游戏开始成功", "GAME")
             
         except Exception as e:
             self.logger.error("开始游戏失败", "GAME", e)
 
     def _restart_game(self):
-        """重新初始化游戏的所有组件"""
-        # 重置游戏状态
-        self.game_state.__init__(self.config)  # 重新初始化状态
-        self.game_state.logger = self.logger   # 重新设置logger
-        
-        # 重新生成地图
-        level = self.floor_manager.generate_initial_level()
-        player_pos = self.floor_manager.find_player(level)
-        
-        if not player_pos:
-            self.logger.error("重新开始时未找到玩家位置", "GAME") 
-            return
-        
-        # 设置新关卡
-        self.game_state.set_level(level)
-        
-        # 重新创建玩家（自动重置经验和等级）
-        from game.player import Player
-        self.player = Player(
-            player_pos[0],
-            player_pos[1],
-            hp=10,
-            move_cooldown=self.config.move_cooldown,
-            max_stamina=float(self.config.stamina_max) if self.config.stamina_max is not None else 100.0,
-            stamina_regen=float(self.config.stamina_regen) if self.config.stamina_regen is not None else 12.0,
-            sprint_cost=float(self.config.sprint_cost) if self.config.sprint_cost is not None else 35.0,
-            sprint_cooldown_ms=(
-                int(self.config.sprint_cooldown_ms) if self.config.sprint_cooldown_ms is not None else 800
-            ),
-            sprint_multiplier=(
-                float(self.config.sprint_multiplier) if self.config.sprint_multiplier is not None else 0.6
-            ),
-            sight_radius=int(self.config.sight_radius) if self.config.sight_radius is not None else 6,
+        """Deprecated: use session_controller.restart_game instead."""
+        self.game_state, self.player, self.entity_mgr, self.npcs = session_restart_game(
+            self.config, self.logger, self.floor_manager, self.renderer, self.game_state
         )
-        
-        # 重新设置关卡（实体和NPC）
-        self._setup_initial_level()
-        
-        # 重新初始化其他系统
-        if self.config.enable_fov and self.player:
-            self.player.update_fov(self.game_state.level)
-        
         self.logger.info("游戏重新开始完成", "GAME")
 
     def _handle_pause_game(self):
