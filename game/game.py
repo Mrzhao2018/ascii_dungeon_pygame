@@ -307,6 +307,41 @@ class Game:
 
     def _trigger_floor_transition(self):
         """Trigger a floor transition"""
+        # 给予楼层完成经验奖励
+        from .experience import EXPERIENCE_CONFIG
+        floor_exp = EXPERIENCE_CONFIG["exp_sources"]["floor_completion"]
+        leveled_up = self.player.gain_experience(floor_exp)
+        
+        # 添加楼层完成经验提示
+        px, py = self.player.x, self.player.y
+        self.game_state.floating_texts.append(
+            {
+                'ent_id': None,
+                'text': f'Floor Complete! +{floor_exp} EXP',
+                'time': 2000,
+                'alpha': 255,
+                'floor_complete': True,
+                'last_pos': (px * self.config.tile_size, py * self.config.tile_size - 30),
+            }
+        )
+        
+        # 如果升级了，添加升级提示
+        if leveled_up:
+            self.game_state.floating_texts.append(
+                {
+                    'ent_id': None,
+                    'text': f'LEVEL UP! Lv.{self.player.level}',
+                    'time': 2000,
+                    'alpha': 255,
+                    'level_up': True,
+                    'last_pos': (px * self.config.tile_size, py * self.config.tile_size - 50),
+                }
+            )
+        
+        # 记录楼层完成
+        if self.logger:
+            self.logger.info(f"完成第 {self.game_state.floor_number} 层, 获得 {floor_exp} 经验, 当前等级: {self.player.level}", "FLOOR")
+        
         self.game_state.floor_number += 1
 
         self.game_state.game_log(f'Starting floor transition to {self.game_state.floor_number}')
@@ -390,6 +425,43 @@ class Game:
                         pass
 
                 if ent.hp <= 0:
+                    # 计算经验奖励
+                    from .experience import get_enemy_exp_reward
+                    enemy_type = getattr(ent, 'kind', 'normal')
+                    exp_reward = get_enemy_exp_reward(enemy_type)
+                    
+                    # 给予玩家经验
+                    leveled_up = self.player.gain_experience(exp_reward)
+                    
+                    # 添加经验获取提示
+                    self.game_state.floating_texts.append(
+                        {
+                            'ent_id': None,  # 不绑定到实体
+                            'text': f'+{exp_reward} EXP',
+                            'time': 1000,
+                            'alpha': 255,
+                            'experience': True,
+                            'last_pos': (nx * self.config.tile_size, ny * self.config.tile_size + 20),
+                        }
+                    )
+                    
+                    # 如果升级了，添加升级提示
+                    if leveled_up:
+                        self.game_state.floating_texts.append(
+                            {
+                                'ent_id': None,
+                                'text': f'LEVEL UP! Lv.{self.player.level}',
+                                'time': 2000,
+                                'alpha': 255,
+                                'level_up': True,
+                                'last_pos': (nx * self.config.tile_size, ny * self.config.tile_size - 20),
+                            }
+                        )
+                    
+                    # 记录击败敌人（用于调试和统计）
+                    if self.logger:
+                        self.logger.info(f"击败敌人 {enemy_type}, 获得 {exp_reward} 经验, 当前等级: {self.player.level}", "COMBAT")
+                    
                     # Remove entity
                     if self.entity_mgr:
                         self.entity_mgr.remove(ent)
@@ -651,7 +723,7 @@ class Game:
         # 设置新关卡
         self.game_state.set_level(level)
         
-        # 重新创建玩家
+        # 重新创建玩家（自动重置经验和等级）
         from game.player import Player
         self.player = Player(
             player_pos[0],

@@ -52,12 +52,29 @@ def draw_floating_texts(
             continue
 
         dmg = int(ft.get('damage', 1))
-        t = min(1.0, dmg / 6.0)
-        r = int(255)
-        g = int(120 + (135 * t))
-        b = int(120 - (60 * t))
-        color = (r, g, max(0, b))
-        size = max(12, int(base_tile_size * (1.0 + min(1.0, dmg / 4.0))))
+        
+        # 根据文本类型设置不同颜色和大小
+        if ft.get('experience'):
+            # 经验获取 - 蓝色
+            color = (100, 200, 255)
+            size = max(14, int(base_tile_size * 0.8))
+        elif ft.get('level_up'):
+            # 升级 - 金色，较大
+            color = (255, 215, 0)
+            size = max(18, int(base_tile_size * 1.2))
+        elif ft.get('floor_complete'):
+            # 楼层完成 - 绿色
+            color = (100, 255, 100)
+            size = max(16, int(base_tile_size * 1.0))
+        else:
+            # 伤害 - 红色系，根据伤害值调整
+            t = min(1.0, dmg / 6.0)
+            r = int(255)
+            g = int(120 + (135 * t))
+            b = int(120 - (60 * t))
+            color = (r, g, max(0, b))
+            size = max(12, int(base_tile_size * (1.0 + min(1.0, dmg / 4.0))))
+            
         txt_font = get_font(used_font_path, size)
         alpha = max(0, min(255, int(255 * (ft['time'] / FLOAT_TOTAL))))
         txt_surf = txt_font.render(ft['text'], True, color)
@@ -126,16 +143,57 @@ def draw_stamina_bar(surface, x, y, width, height, stamina, max_stamina, font=No
 
 
 def draw_player_hud(surface, player, ox, oy, view_px_w, font_path=None):
-    """Draw a small HUD showing HP and stamina bar at top-right.
-    player: Player instance with hp, stamina, max_stamina, sprint_cooldown
+    """Draw a small HUD showing HP, stamina bar, level and experience at top.
+    player: Player instance with hp, stamina, max_stamina, sprint_cooldown, level, experience
     ox, oy: shake offsets
     view_px_w: width of viewport (for positioning)
     """
     try:
         hud_font = get_font(font_path, 16)
+        small_font = get_font(font_path, 14)
+        
         # HP on left (slightly larger for visibility)
-        hp_s = hud_font.render(f'HP: {player.hp}', True, (255, 180, 180))
+        hp_text = f'HP: {player.hp}'
+        if hasattr(player, 'max_hp'):
+            hp_text = f'HP: {player.hp}/{player.max_hp}'
+        hp_s = hud_font.render(hp_text, True, (255, 180, 180))
         surface.blit(hp_s, (8 + ox, 8 + oy))
+
+        # Level display (below HP)
+        level_text = f'Level: {player.level}'
+        level_s = small_font.render(level_text, True, (180, 255, 180))
+        surface.blit(level_s, (8 + ox, 28 + oy))
+
+        # Experience bar (below level)
+        if hasattr(player, 'get_experience_info'):
+            exp_info = player.get_experience_info()
+            exp_bar_w = 120
+            exp_bar_h = 8
+            exp_bar_x = 8 + ox
+            exp_bar_y = 48 + oy
+            
+            # Background
+            pygame.draw.rect(surface, (40, 40, 40), (exp_bar_x, exp_bar_y, exp_bar_w, exp_bar_h))
+            
+            # Experience fill
+            if not exp_info['max_level']:
+                fill_w = int(exp_bar_w * exp_info['exp_progress'])
+                if fill_w > 0:
+                    pygame.draw.rect(surface, (100, 200, 255), (exp_bar_x, exp_bar_y, fill_w, exp_bar_h))
+            else:
+                # Max level - fill with gold
+                pygame.draw.rect(surface, (255, 215, 0), (exp_bar_x, exp_bar_y, exp_bar_w, exp_bar_h))
+            
+            # Border
+            pygame.draw.rect(surface, (100, 100, 100), (exp_bar_x, exp_bar_y, exp_bar_w, exp_bar_h), 1)
+            
+            # Experience text
+            if exp_info['max_level']:
+                exp_text = "MAX"
+            else:
+                exp_text = f"{exp_info['exp_in_level']}/{exp_info['exp_in_level'] + exp_info['exp_to_next']}"
+            exp_text_s = small_font.render(exp_text, True, (200, 200, 200))
+            surface.blit(exp_text_s, (exp_bar_x + exp_bar_w + 5, exp_bar_y - 2))
 
         # stamina bar at top-right
         bar_w = 160
@@ -169,6 +227,56 @@ def draw_player_hud(surface, player, ox, oy, view_px_w, font_path=None):
                 surface.blit(txt_s, (cx - sw // 2, cy - sh // 2))
             except Exception:
                 pass
+        
+        # Level up notification
+        if hasattr(player, 'level_up_notification') and player.level_up_notification:
+            try:
+                notification = player.level_up_notification
+                big_font = get_font(font_path, 24)
+                
+                # Level up text
+                level_up_text = f"LEVEL UP! {notification['level']}"
+                level_up_s = big_font.render(level_up_text, True, (255, 255, 100))
+                
+                # Center horizontally, place in upper middle of screen
+                level_up_x = (view_px_w - level_up_s.get_width()) // 2 + ox
+                level_up_y = 80 + oy
+                
+                # Background glow effect
+                glow_surface = pygame.Surface((level_up_s.get_width() + 20, level_up_s.get_height() + 10), pygame.SRCALPHA)
+                pygame.draw.rect(glow_surface, (255, 255, 100, 60), glow_surface.get_rect(), border_radius=5)
+                surface.blit(glow_surface, (level_up_x - 10, level_up_y - 5))
+                
+                surface.blit(level_up_s, (level_up_x, level_up_y))
+                
+                # Bonus information
+                bonuses = notification.get('bonuses', {})
+                bonus_font = get_font(font_path, 12)
+                bonus_y = level_up_y + 30
+                
+                if bonuses.get('hp_bonus', 0) > 0:
+                    bonus_text = f"生命值 +{bonuses['hp_bonus']}"
+                    bonus_s = bonus_font.render(bonus_text, True, (255, 180, 180))
+                    bonus_x = (view_px_w - bonus_s.get_width()) // 2 + ox
+                    surface.blit(bonus_s, (bonus_x, bonus_y))
+                    bonus_y += 15
+                
+                if bonuses.get('stamina_bonus', 0) > 0:
+                    bonus_text = f"体力 +{bonuses['stamina_bonus']}"
+                    bonus_s = bonus_font.render(bonus_text, True, (180, 180, 255))
+                    bonus_x = (view_px_w - bonus_s.get_width()) // 2 + ox
+                    surface.blit(bonus_s, (bonus_x, bonus_y))
+                    bonus_y += 15
+                
+                if bonuses.get('move_speed_bonus', 0) > 0:
+                    bonus_text = f"移动速度 +{bonuses['move_speed_bonus']*100:.0f}%"
+                    bonus_s = bonus_font.render(bonus_text, True, (180, 255, 180))
+                    bonus_x = (view_px_w - bonus_s.get_width()) // 2 + ox
+                    surface.blit(bonus_s, (bonus_x, bonus_y))
+                    
+            except Exception:
+                pass
+                
     except Exception:
         pass
 

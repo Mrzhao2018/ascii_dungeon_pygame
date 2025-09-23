@@ -114,3 +114,7 @@
 [43800] Generating floor 6 with seed 12351, size 80x30
 [43813] Wrote floor snapshot: e:\pygame\game\..\data\debug\maps\last_level_floor_6.txt
 [43813] Wrote post-entity floor snapshot: e:\pygame\game\..\data\debug\maps\last_level_floor_6_after_entities.txt
+[27077] Floor transition triggered: floor 2, seed 12347
+[28135] Generating floor 2 with seed 12347, size 80x30
+[28149] Wrote floor snapshot: e:\pygame\game\..\data\debug\maps\last_level_floor_2.txt
+[28150] Wrote post-entity floor snapshot: e:\pygame\game\..\data\debug\maps\last_level_floor_2_after_entities.txt

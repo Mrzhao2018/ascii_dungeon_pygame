@@ -1,5 +1,11 @@
 import random
 from .fov import FOVSystem
+from .experience import (
+    calculate_exp_required, 
+    calculate_exp_to_next_level, 
+    get_level_bonuses,
+    EXPERIENCE_CONFIG
+)
 
 
 class Player:
@@ -18,27 +24,48 @@ class Player:
     ):
         self.x = x
         self.y = y
+        
+        # 经验和等级系统
+        self.level = 1
+        self.experience = 0
+        self.base_hp = hp
         self.hp = hp
+        
+        # 基础属性（用于计算等级加成）
+        self.base_max_stamina = float(max_stamina)
+        self.base_stamina_regen = float(stamina_regen)
+        self.base_sprint_cost = float(sprint_cost)
+        self.base_move_cooldown = move_cooldown
+        self.base_sprint_cooldown_ms = int(sprint_cooldown_ms)
+        self.base_iframes = 800
+        self.base_sight_radius = sight_radius
+        
+        # FOV系统（在应用加成之前初始化）
+        self.fov_system = FOVSystem(self.base_sight_radius)
+        
+        # 应用当前等级的属性加成
+        self._apply_level_bonuses()
+        
         # visual/iframes
         self.flash_time = 0
         self.PLAYER_FLASH_DURATION = 400
         self.i_frames = 0
-        self.PLAYER_IFRAMES = 800
+        self.PLAYER_IFRAMES = self.base_iframes
 
         # movement timing
-        self.MOVE_COOLDOWN = move_cooldown
+        self.MOVE_COOLDOWN = self.base_move_cooldown
         self.move_timer = 0
         self.SPRINT_MULTIPLIER = sprint_multiplier
 
         # stamina
-        self.max_stamina = float(max_stamina)
+        self.max_stamina = float(self.base_max_stamina)
         self.stamina = float(self.max_stamina)
-        self.stamina_regen_per_sec = float(stamina_regen)
-        self.sprint_cost_per_sec = float(sprint_cost)
+        self.stamina_regen_per_sec = float(self.base_stamina_regen)
+        self.sprint_cost_per_sec = float(self.base_sprint_cost)
 
         # sprint cooldown after exhaust
         self.sprint_cooldown = 0
-        self.SPRINT_COOLDOWN_AFTER_EXHAUST = int(sprint_cooldown_ms)
+        self.SPRINT_COOLDOWN_AFTER_EXHAUST = self.base_sprint_cooldown_ms
 
         # regen pause (ms) after sprint action
         self.REGEN_PAUSE_AFTER_SPRINT_MS = 300
@@ -47,8 +74,9 @@ class Player:
         # sprint particles for visual tail (list of dicts with x_px,y_px,vx,vy,time)
         self.sprint_particles = []
 
-        # FOV系统
-        self.fov_system = FOVSystem(sight_radius)
+        # 升级提示
+        self.level_up_notification = None
+        self.level_up_timer = 0
 
     def spawn_sprint_particle(self, tile_x, tile_y, dx, dy):
         bx = tile_x * 24 + 24 // 2
@@ -110,6 +138,9 @@ class Player:
             self.regen_pause_timer -= dt
             if self.regen_pause_timer < 0:
                 self.regen_pause_timer = 0
+        
+        # 更新升级提示计时器
+        self.update_level_up_notification(dt)
 
     def _compute_sprint_consumption(self, delta_ms):
         frac = max(0.0, min(1.0, self.stamina / self.max_stamina))
@@ -230,3 +261,131 @@ class Player:
         """清除探索记录（用于换层）"""
         if self.fov_system:
             self.fov_system.clear_exploration()
+
+    # ===================
+    # 经验和升级系统
+    # ===================
+
+    def _apply_level_bonuses(self):
+        """应用当前等级的属性加成"""
+        bonuses = get_level_bonuses(self.level)
+        
+        # 更新最大生命值和当前生命值
+        old_max_hp = getattr(self, 'max_hp', self.base_hp)
+        self.max_hp = self.base_hp + bonuses['hp_bonus']
+        
+        # 如果是升级，按比例增加当前生命值
+        if hasattr(self, 'hp') and old_max_hp > 0:
+            hp_ratio = self.hp / old_max_hp
+            self.hp = int(self.max_hp * hp_ratio)
+        else:
+            self.hp = self.max_hp
+        
+        # 更新体力相关属性
+        old_max_stamina = getattr(self, 'max_stamina', self.base_max_stamina)
+        self.max_stamina = self.base_max_stamina + bonuses['stamina_bonus']
+        
+        # 按比例更新当前体力
+        if hasattr(self, 'stamina') and old_max_stamina > 0:
+            stamina_ratio = self.stamina / old_max_stamina
+            self.stamina = self.max_stamina * stamina_ratio
+        else:
+            self.stamina = self.max_stamina
+        
+        # 更新体力恢复速度
+        regen_multiplier = 1.0 + bonuses['stamina_regen_bonus']
+        self.stamina_regen_per_sec = self.base_stamina_regen * regen_multiplier
+        
+        # 更新冲刺消耗
+        cost_multiplier = 1.0 - bonuses['sprint_cost_reduction']
+        self.sprint_cost_per_sec = self.base_sprint_cost * cost_multiplier
+        
+        # 更新移动速度（通过调整移动冷却时间）
+        speed_multiplier = 1.0 + bonuses['move_speed_bonus']
+        self.MOVE_COOLDOWN = max(50, int(self.base_move_cooldown / speed_multiplier))
+        
+        # 更新无敌时间
+        iframes_multiplier = 1.0 + bonuses['iframes_bonus']
+        self.PLAYER_IFRAMES = int(self.base_iframes * iframes_multiplier)
+        
+        # 更新视野半径
+        new_sight_radius = self.base_sight_radius + bonuses['sight_radius_bonus']
+        if self.fov_system:
+            self.fov_system.set_sight_radius(int(new_sight_radius))
+
+    def gain_experience(self, amount):
+        """获得经验值并检查升级"""
+        if self.level >= EXPERIENCE_CONFIG["max_level"]:
+            return False  # 已达到最大等级
+        
+        self.experience += amount
+        
+        # 检查是否升级
+        leveled_up = False
+        while self.level < EXPERIENCE_CONFIG["max_level"]:
+            exp_required = calculate_exp_required(self.level + 1)
+            if self.experience >= exp_required:
+                self.level += 1
+                leveled_up = True
+                self._apply_level_bonuses()
+                self._trigger_level_up_notification()
+            else:
+                break
+        
+        return leveled_up
+
+    def _trigger_level_up_notification(self):
+        """触发升级提示"""
+        self.level_up_notification = {
+            "level": self.level,
+            "message": f"升级到 {self.level} 级！",
+            "bonuses": get_level_bonuses(self.level)
+        }
+        self.level_up_timer = 3000  # 显示3秒
+
+    def update_level_up_notification(self, dt):
+        """更新升级提示计时器"""
+        if self.level_up_timer > 0:
+            self.level_up_timer -= dt
+            if self.level_up_timer <= 0:
+                self.level_up_notification = None
+
+    def get_experience_info(self):
+        """获取经验相关信息"""
+        current_level_exp = calculate_exp_required(self.level)
+        next_level_exp = calculate_exp_required(self.level + 1)
+        
+        if self.level >= EXPERIENCE_CONFIG["max_level"]:
+            return {
+                "level": self.level,
+                "current_exp": self.experience,
+                "exp_in_level": 0,
+                "exp_to_next": 0,
+                "exp_progress": 1.0,
+                "max_level": True
+            }
+        
+        exp_in_level = self.experience - current_level_exp
+        exp_to_next = next_level_exp - self.experience
+        exp_progress = exp_in_level / (next_level_exp - current_level_exp) if next_level_exp > current_level_exp else 1.0
+        
+        return {
+            "level": self.level,
+            "current_exp": self.experience,
+            "exp_in_level": exp_in_level,
+            "exp_to_next": exp_to_next,
+            "exp_progress": exp_progress,
+            "max_level": False
+        }
+
+    def get_level_bonuses_info(self):
+        """获取当前等级的属性加成信息"""
+        return get_level_bonuses(self.level)
+
+    def reset_experience(self):
+        """重置经验和等级（用于重新开始游戏）"""
+        self.level = 1
+        self.experience = 0
+        self.level_up_notification = None
+        self.level_up_timer = 0
+        self._apply_level_bonuses()
