@@ -44,10 +44,10 @@ class Game:
             pygame.init()
             self.logger.debug("Pygame initialized", "GAME")
 
-            # Initialize level and entities
-            self._initialize_game_world()
+            # Initialize level and entities (delay until game starts)
+            # _initialize_game_world() will be called when user starts game
 
-            # Initialize renderer (after level is set up)
+            # Initialize renderer
             self.renderer = Renderer(self.config, self.game_state)
 
             # Initialize audio
@@ -82,9 +82,10 @@ class Game:
             # Entity and interaction state
             self.entity_mgr = None
             self.npcs = {}
+            self.player = None  # Will be created when game starts
 
-            # Setup initial level
-            self._setup_initial_level()
+            # Don't setup initial level - wait for game start
+            # self._setup_initial_level() will be called from _handle_start_game()
 
             self.logger.info("Game initialization completed successfully", "GAME")
 
@@ -205,14 +206,26 @@ class Game:
 
                 # Render frame
                 render_frame_start = time.perf_counter()
-                self.error_handler.safe_call(
-                    self.renderer.render_frame,
-                    "rendering",
-                    self.player,
-                    self.entity_mgr,
-                    self.game_state.floating_texts,
-                    self.npcs,
-                )
+                # 在主菜单状态下，不传递player和entity参数
+                from game.state import GameStateEnum
+                if self.game_state.current_state == GameStateEnum.MAIN_MENU:
+                    self.error_handler.safe_call(
+                        self.renderer.render_frame,
+                        "rendering",
+                        None,  # player
+                        None,  # entity_mgr
+                        [],    # floating_texts
+                        None,  # npcs
+                    )
+                else:
+                    self.error_handler.safe_call(
+                        self.renderer.render_frame,
+                        "rendering",
+                        self.player,
+                        self.entity_mgr,
+                        self.game_state.floating_texts,
+                        self.npcs,
+                    )
                 render_time = (time.perf_counter() - render_frame_start) * 1000
                 self.performance_optimizer.monitor.record_render_time(render_time)
 
@@ -236,6 +249,24 @@ class Game:
 
     def _process_input_results(self, input_results, dt):
         """Process discrete input events"""
+        # Handle pause/resume game
+        if input_results.get('pause_game'):
+            self._handle_pause_game()
+            return  # 暂停后跳过其他输入处理
+        
+        if input_results.get('resume_game'):
+            self._handle_resume_game()
+            return  # 恢复后跳过其他输入处理
+        
+        if input_results.get('goto_main_menu'):
+            self._handle_goto_main_menu()
+            return  # 返回主菜单后跳过其他输入处理
+        
+        # Handle start game from main menu
+        if input_results.get('start_game'):
+            self._handle_start_game()
+            return  # 开始游戏后跳过其他输入处理
+        
         # Handle restart game
         if input_results.get('restart_game'):
             self._handle_restart_game()
@@ -248,6 +279,10 @@ class Game:
         # Handle debug panel toggle
         if input_results.get('toggle_debug_panel'):
             self._handle_debug_panel_toggle(input_results.get('toggle_debug_panel'))
+
+        # 以下操作需要玩家存在
+        if self.player is None:
+            return
 
         # Handle interaction
         if input_results.get('interaction'):
@@ -270,6 +305,10 @@ class Game:
 
     def _process_continuous_input(self, continuous_input, dt):
         """Process continuous input (movement, etc.)"""
+        # 检查玩家是否存在
+        if self.player is None:
+            return
+            
         movement = continuous_input.get('continuous_movement')
         is_sprinting = continuous_input.get('sprinting', False)
 
@@ -303,7 +342,7 @@ class Game:
         if moved_result.get('sprinting'):
             dx = nx - px
             dy = ny - py
-            self.player.spawn_sprint_particle(px, py, dx, dy)
+            self.player.spawn_sprint_particle(px, py, dx, dy, self.config.tile_size)
 
     def _trigger_floor_transition(self):
         """Trigger a floor transition"""
@@ -496,10 +535,12 @@ class Game:
 
     def _update_game_systems(self, dt):
         """Update all game systems"""
-        # 只在PLAYING状态下更新游戏系统
+        # 只在PLAYING状态下更新游戏系统，暂停状态下不更新
         from game.state import GameStateEnum
-        if self.game_state.current_state != GameStateEnum.PLAYING:
-            return  # 非游戏状态下跳过游戏逻辑更新
+        if (self.game_state.current_state != GameStateEnum.PLAYING or 
+            self.game_state.current_state == GameStateEnum.PAUSED or 
+            self.player is None):
+            return  # 非游戏状态、暂停状态或玩家未初始化时跳过游戏逻辑更新
         
         # Update player
         prev_sprint_cd = getattr(self.player, 'sprint_cooldown', 0)
@@ -706,6 +747,25 @@ class Game:
         except Exception as e:
             self.logger.error("重新开始游戏失败", "GAME", e)
 
+    def _handle_start_game(self):
+        """处理从主菜单开始游戏"""
+        try:
+            self.logger.info("从主菜单开始游戏", "GAME")
+            
+            # 确保游戏世界已初始化
+            if self.game_state.level is None or len(self.game_state.level) == 0:
+                self._initialize_game_world()
+                self._setup_initial_level()
+            
+            # 切换到游戏状态
+            from game.state import GameStateEnum
+            self.game_state.set_game_state(GameStateEnum.PLAYING)
+            
+            self.logger.info("游戏开始成功", "GAME")
+            
+        except Exception as e:
+            self.logger.error("开始游戏失败", "GAME", e)
+
     def _restart_game(self):
         """重新初始化游戏的所有组件"""
         # 重置游戏状态
@@ -750,3 +810,23 @@ class Game:
             self.player.update_fov(self.game_state.level)
         
         self.logger.info("游戏重新开始完成", "GAME")
+
+    def _handle_pause_game(self):
+        """处理暂停游戏"""
+        from game.state import GameStateEnum
+        if self.game_state.current_state == GameStateEnum.PLAYING:
+            self.game_state.set_game_state(GameStateEnum.PAUSED)
+            self.logger.info("游戏已暂停", "GAME")
+
+    def _handle_resume_game(self):
+        """处理恢复游戏"""
+        from game.state import GameStateEnum
+        if self.game_state.current_state == GameStateEnum.PAUSED:
+            self.game_state.set_game_state(GameStateEnum.PLAYING)
+            self.logger.info("游戏已恢复", "GAME")
+
+    def _handle_goto_main_menu(self):
+        """处理返回主菜单"""
+        from game.state import GameStateEnum
+        self.game_state.set_game_state(GameStateEnum.MAIN_MENU)
+        self.logger.info("返回主菜单", "GAME")

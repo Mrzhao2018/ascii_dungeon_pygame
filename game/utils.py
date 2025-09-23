@@ -95,6 +95,80 @@ def load_preferred_font(tile_size):
     return font, used_path
 
 
+def load_chinese_font(tile_size):
+    """专门加载支持中文的字体"""
+    # 系统中文字体列表
+    chinese_font_names = [
+        'Microsoft YaHei',
+        'Microsoft YaHei UI', 
+        'SimHei',
+        'SimSun',
+        'Noto Sans CJK SC',
+        'WenQuanYi Micro Hei',
+        'Source Han Sans SC',
+        'PingFang SC',
+        'Hiragino Sans GB',
+        'STHeiti',
+        'DengXian',
+        'KaiTi',
+        'FangSong',
+    ]
+    
+    font = None
+    used_path = None
+    
+    # 首先尝试系统字体
+    for font_name in chinese_font_names:
+        try:
+            match = pygame.font.match_font(font_name)
+        except Exception:
+            match = None
+        if match:
+            try:
+                font = pygame.font.Font(match, tile_size)
+                # 测试是否能渲染中文
+                test_surface = font.render("中", True, (255, 255, 255))
+                if test_surface.get_width() > 0:
+                    used_path = match
+                    break
+                else:
+                    font = None
+            except Exception:
+                font = None
+    
+    # 如果系统字体都不行，尝试本地字体目录
+    if font is None:
+        fonts_dir = os.path.join(os.path.dirname(__file__), '..', 'fonts')
+        chinese_patterns = ['noto', 'sourcehan', 'wenquan', 'simhei', 'simsun', 'yahei']
+        candidates = []
+        try:
+            if os.path.isdir(fonts_dir):
+                for name in os.listdir(fonts_dir):
+                    if name.lower().endswith(('.ttf', '.otf')):
+                        candidates.append(os.path.join(fonts_dir, name))
+        except Exception:
+            candidates = []
+        
+        for pattern in chinese_patterns:
+            for fpath in candidates:
+                if pattern in os.path.basename(fpath).lower():
+                    try:
+                        font = pygame.font.Font(fpath, tile_size)
+                        # 测试是否能渲染中文
+                        test_surface = font.render("中", True, (255, 255, 255))
+                        if test_surface.get_width() > 0:
+                            used_path = fpath
+                            break
+                        else:
+                            font = None
+                    except Exception:
+                        font = None
+            if font:
+                break
+    
+    return font, used_path
+
+
 def load_level(fallback_level):
     """尝试从 data/level.txt 加载地图；若不存在则返回 fallback_level（list of str）。"""
     path = os.path.join(os.path.dirname(__file__), '..', 'data', 'level.txt')

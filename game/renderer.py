@@ -17,20 +17,56 @@ class Renderer:
         self.config = config
         self.game_state = game_state
 
-        # Initialize display
-        view_w_tiles = min(game_state.width, config.view_width)
-        view_h_tiles = min(game_state.height, config.view_height)
+        # Initialize display - 在主菜单状态下使用配置的默认尺寸
+        if game_state.width == 0 or game_state.height == 0:
+            # 主菜单状态，使用配置的视图尺寸
+            view_w_tiles = config.view_width
+            view_h_tiles = config.view_height
+        else:
+            # 游戏状态，使用实际地图尺寸限制
+            view_w_tiles = min(game_state.width, config.view_width)
+            view_h_tiles = min(game_state.height, config.view_height)
+            
         self.view_px_w = view_w_tiles * config.tile_size
         self.view_px_h = view_h_tiles * config.tile_size
 
         self.screen = pygame.display.set_mode((self.view_px_w, self.view_px_h))
-        pygame.display.set_caption("ASCII Adventure - Pygame 示例")
+        pygame.display.set_caption("ASCII 地牢探险 - v2.2.0")
 
         # Load font
         self.font, self.used_path = utils.load_preferred_font(config.tile_size)
+        
+        # Test if the font supports Chinese characters, if not, try to load a Chinese font
+        self.chinese_font = None
+        try:
+            # Test rendering a Chinese character
+            test_surface = self.font.render("中", True, (255, 255, 255))
+            if test_surface.get_width() > 0:
+                # Font supports Chinese
+                self.chinese_font = self.font
+            else:
+                raise Exception("Font doesn't support Chinese")
+        except:
+            # Font doesn't support Chinese, try to load a Chinese font
+            chinese_font, chinese_path = utils.load_chinese_font(config.tile_size)
+            if chinese_font:
+                self.chinese_font = chinese_font
+                logger = getattr(game_state, 'logger', None)
+                if logger:
+                    logger.info(f"中文字体加载成功: {chinese_path}")
+            else:
+                # Fallback to the original font
+                self.chinese_font = self.font
+        
+        # Log font loading information
+        logger = getattr(game_state, 'logger', None)
+        if logger:
+            if self.used_path:
+                logger.info(f"主字体加载成功: {self.used_path}")
+            else:
+                logger.info("使用系统默认字体")
 
         # Initialize debug overlay - always create it but enable/disable based on config
-        logger = getattr(game_state, 'logger', None)
         if logger:
             self.debug_overlay = DebugOverlay(config, logger)
         else:
@@ -58,10 +94,19 @@ class Renderer:
         from game.state import GameStateEnum
         
         # 根据游戏状态选择渲染方式
-        if self.game_state.current_state == GameStateEnum.GAME_OVER:
+        if self.game_state.current_state == GameStateEnum.MAIN_MENU:
+            self._render_main_menu()
+        elif self.game_state.current_state == GameStateEnum.GAME_OVER:
             self._render_game_over_screen()
+        elif self.game_state.current_state == GameStateEnum.PAUSED:
+            # 暂停状态：先渲染游戏画面，再渲染暂停覆盖层
+            self._render_playing_game(player, entity_mgr, floating_texts, npcs)
+            self._render_pause_overlay()
         else:
             self._render_playing_game(player, entity_mgr, floating_texts, npcs)
+        
+        # 统一在这里更新显示，避免多次 flip() 造成闪烁
+        pygame.display.flip()
 
     def _render_playing_game(self, player, entity_mgr, floating_texts, npcs=None):
         """渲染正常游戏界面"""
@@ -97,7 +142,110 @@ class Renderer:
             self.debug_overlay.update_debug_mode()
             self.debug_overlay.render(self.screen, self.game_state, player, entity_mgr, npcs)
 
-        pygame.display.flip()
+        # 不在这里调用 flip()，让主渲染方法统一处理
+
+    def _render_main_menu(self):
+        """渲染主菜单界面"""
+        # 清屏 - 使用深蓝色背景
+        self.screen.fill((20, 30, 50))
+        
+        # 计算屏幕中心
+        center_x = self.view_px_w // 2
+        center_y = self.view_px_h // 2
+        
+        # Debug: 显示屏幕尺寸信息
+        debug_text = f"Screen: {self.view_px_w}x{self.view_px_h}"
+        debug_surface = self.font.render(debug_text, True, (255, 255, 255))
+        self.screen.blit(debug_surface, (10, 10))
+        
+        # 使用加载的字体，如果太大则缩小尺寸
+        menu_font = self.font
+        font_size = self.config.tile_size
+        
+        # 如果字体太大，创建一个较小的版本
+        if font_size > 24:
+            try:
+                # 尝试使用较小的字体大小重新加载
+                from game import utils
+                menu_font, _ = utils.load_preferred_font(20)  # 使用20像素字体
+                if menu_font is None:
+                    menu_font = self.font
+            except:
+                menu_font = self.font
+        
+        # 游戏标题
+        title_text = "ASCII 地牢探险"
+        title_color = (255, 255, 150)  # 金黄色
+        try:
+            title_surface = menu_font.render(title_text, True, title_color)
+        except:
+            # 如果中文渲染失败，使用英文
+            title_surface = menu_font.render("ASCII Dungeon", True, title_color)
+        title_rect = title_surface.get_rect(center=(center_x, center_y - 120))
+        self.screen.blit(title_surface, title_rect)
+        
+        # 副标题
+        subtitle_text = "Dungeon Adventure"
+        subtitle_color = (200, 200, 200)
+        subtitle_surface = menu_font.render(subtitle_text, True, subtitle_color)
+        subtitle_rect = subtitle_surface.get_rect(center=(center_x, center_y - 80))
+        self.screen.blit(subtitle_surface, subtitle_rect)
+        
+        # 菜单选项
+        try:
+            start_text = "开始游戏"
+            start_surface = menu_font.render(start_text, True, (220, 255, 220))
+        except:
+            start_surface = menu_font.render("Start Game", True, (220, 255, 220))
+        start_rect = start_surface.get_rect(center=(center_x, center_y - 20))
+        self.screen.blit(start_surface, start_rect)
+        
+        try:
+            quit_text = "退出游戏"
+            quit_surface = menu_font.render(quit_text, True, (255, 220, 220))
+        except:
+            quit_surface = menu_font.render("Quit Game", True, (255, 220, 220))
+        quit_rect = quit_surface.get_rect(center=(center_x, center_y + 30))
+        self.screen.blit(quit_surface, quit_rect)
+        
+        # 控制提示 - 尝试中文，失败则使用英文
+        try:
+            controls = [
+                "方向键/WASD: 移动  空格: 攻击  E: 交互",
+                "Shift: 冲刺  Tab: 显示出口  F12: 调试模式",
+                "按 Enter 开始游戏  按 Esc 退出"
+            ]
+            # 测试第一行是否能正常渲染
+            test_surface = menu_font.render(controls[0], True, (150, 150, 150))
+        except:
+            # 如果中文失败，使用英文
+            controls = [
+                "WASD/Arrow Keys: Move  Space: Attack  E: Interact",
+                "Shift: Sprint  Tab: Show Exit  F12: Debug Mode",
+                "Press Enter to Start  Press Esc to Quit"
+            ]
+        
+        for i, text in enumerate(controls):
+            y_offset = center_y + 120 + i * 30
+            try:
+                control_surface = menu_font.render(text, True, (150, 150, 150))
+            except:
+                # 如果渲染失败，跳过这行
+                continue
+            control_rect = control_surface.get_rect(center=(center_x, y_offset))
+            self.screen.blit(control_surface, control_rect)
+        
+        # 版本信息
+        try:
+            version_text = "v2.2.0 - 经验与升级系统"
+            version_surface = menu_font.render(version_text, True, (100, 100, 100))
+        except:
+            version_text = "v2.2.0 - Experience & Leveling System"
+            version_surface = menu_font.render(version_text, True, (100, 100, 100))
+        version_rect = version_surface.get_rect(center=(center_x, self.view_px_h - 30))
+        self.screen.blit(version_surface, version_rect)
+        
+        # 不在这里调用 flip()，让主渲染方法统一处理
 
     def _render_game_over_screen(self):
         """渲染游戏结束界面"""
@@ -142,7 +290,7 @@ class Renderer:
             skull_rect = skull_surface.get_rect(center=(center_x, center_y - 120))
             self.screen.blit(skull_surface, skull_rect)
         
-        pygame.display.flip()
+        # 不在这里调用 flip()，让主渲染方法统一处理
 
     def _render_level_tiles(self, x0: int, y0: int, x1: int, y1: int, entity_mgr, player, ox: int, oy: int):
         """Render the level tiles with FOV support"""
@@ -212,7 +360,7 @@ class Renderer:
     def _render_ui(self, player, floating_texts, entity_mgr, ox: int, oy: int):
         """Render UI elements"""
         # Player HUD
-        ui.draw_player_hud(self.screen, player, ox, oy, self.view_px_w, font_path=self.used_path)
+        ui.draw_player_hud(self.screen, player, ox, oy, self.view_px_w, font_path=self.used_path, tile_size=self.config.tile_size)
 
         # Target indicator
         if self.game_state.pending_target is not None:
@@ -323,4 +471,99 @@ class Renderer:
                 surf = log_font.render(msg, True, (200, 200, 200))
                 self.screen.blit(surf, (lx, ly + i * 16))
             except Exception:
+                pass
+
+    def _render_pause_overlay(self):
+        """渲染暂停覆盖层"""
+        try:
+            # 创建半透明黑色覆盖层
+            overlay = pygame.Surface((self.view_px_w, self.view_px_h), pygame.SRCALPHA)
+            overlay.fill((0, 0, 0, 128))  # 黑色，50% 透明度
+            self.screen.blit(overlay, (0, 0))
+
+            # 计算屏幕中心
+            center_x = self.view_px_w // 2
+            center_y = self.view_px_h // 2
+
+            # 根据 tile_size 动态调整字体大小
+            title_font_size = max(36, int(self.config.tile_size * 1.8))
+            menu_font_size = max(24, int(self.config.tile_size * 1.2))
+            hint_font_size = max(18, int(self.config.tile_size * 0.9))
+
+            # 暂停标题
+            try:
+                title_font = self.chinese_font if hasattr(self, 'chinese_font') and self.chinese_font else self.font
+                if title_font_size != self.config.tile_size:
+                    # 创建指定大小的字体
+                    from game import utils
+                    title_font = utils.load_preferred_font(title_font_size)[0]
+                
+                pause_text = "游戏暂停"
+                title_surface = title_font.render(pause_text, True, (255, 255, 100))
+            except:
+                # 如果中文失败，使用英文
+                title_font = self.font
+                pause_text = "GAME PAUSED"
+                title_surface = title_font.render(pause_text, True, (255, 255, 100))
+            
+            title_rect = title_surface.get_rect(center=(center_x, center_y - 80))
+            self.screen.blit(title_surface, title_rect)
+
+            # 菜单选项
+            menu_font = self.font
+            if menu_font_size != self.config.tile_size:
+                from game import utils
+                menu_font = utils.load_preferred_font(menu_font_size)[0]
+
+            menu_options = [
+                ("继续游戏", "ESC", (180, 255, 180)),
+                ("重新开始", "Enter", (255, 255, 180)),
+                ("返回主菜单", "M", (180, 180, 255)),
+                ("退出游戏", "Q", (255, 180, 180))
+            ]
+
+            for i, (text, key, color) in enumerate(menu_options):
+                y_offset = center_y - 20 + i * 35
+                try:
+                    # 尝试渲染中文
+                    option_surface = menu_font.render(text, True, color)
+                except:
+                    # 如果失败，使用英文
+                    english_options = ["Continue", "Restart", "Main Menu", "Quit Game"]
+                    option_surface = menu_font.render(english_options[i], True, color)
+                
+                option_rect = option_surface.get_rect(center=(center_x - 50, y_offset))
+                self.screen.blit(option_surface, option_rect)
+
+                # 按键提示
+                key_surface = menu_font.render(f"[{key}]", True, (200, 200, 200))
+                key_rect = key_surface.get_rect(center=(center_x + 80, y_offset))
+                self.screen.blit(key_surface, key_rect)
+
+            # 底部操作提示
+            hint_font = self.font
+            if hint_font_size != self.config.tile_size:
+                from game import utils
+                hint_font = utils.load_preferred_font(hint_font_size)[0]
+
+            try:
+                hint_text = "按 ESC 继续游戏"
+                hint_surface = hint_font.render(hint_text, True, (150, 150, 150))
+            except:
+                hint_surface = hint_font.render("Press ESC to Continue", True, (150, 150, 150))
+            
+            hint_rect = hint_surface.get_rect(center=(center_x, self.view_px_h - 50))
+            self.screen.blit(hint_surface, hint_rect)
+
+            # 不在这里调用 flip()，让主渲染循环统一处理
+
+        except Exception as e:
+            # 如果渲染失败，至少显示基本信息
+            try:
+                basic_font = pygame.font.Font(None, 36)
+                basic_text = basic_font.render("PAUSED - Press ESC", True, (255, 255, 255))
+                basic_rect = basic_text.get_rect(center=(self.view_px_w // 2, self.view_px_h // 2))
+                self.screen.blit(basic_text, basic_rect)
+                # 同样不在这里调用 flip()
+            except:
                 pass

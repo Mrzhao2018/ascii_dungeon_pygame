@@ -142,15 +142,20 @@ def draw_stamina_bar(surface, x, y, width, height, stamina, max_stamina, font=No
         pass
 
 
-def draw_player_hud(surface, player, ox, oy, view_px_w, font_path=None):
+def draw_player_hud(surface, player, ox, oy, view_px_w, font_path=None, tile_size=24):
     """Draw a small HUD showing HP, stamina bar, level and experience at top.
     player: Player instance with hp, stamina, max_stamina, sprint_cooldown, level, experience
     ox, oy: shake offsets
     view_px_w: width of viewport (for positioning)
+    tile_size: base tile size for scaling fonts
     """
     try:
-        hud_font = get_font(font_path, 16)
-        small_font = get_font(font_path, 14)
+        # Scale font sizes based on tile_size
+        base_hud_size = max(16, int(tile_size * 0.8))      # 主要文本
+        base_small_size = max(14, int(tile_size * 0.7))    # 小文本
+        
+        hud_font = get_font(font_path, base_hud_size)
+        small_font = get_font(font_path, base_small_size)
         
         # HP on left (slightly larger for visibility)
         hp_text = f'HP: {player.hp}'
@@ -159,18 +164,19 @@ def draw_player_hud(surface, player, ox, oy, view_px_w, font_path=None):
         hp_s = hud_font.render(hp_text, True, (255, 180, 180))
         surface.blit(hp_s, (8 + ox, 8 + oy))
 
-        # Level display (below HP)
+        # Level display (below HP) - 调整垂直间距
         level_text = f'Level: {player.level}'
         level_s = small_font.render(level_text, True, (180, 255, 180))
-        surface.blit(level_s, (8 + ox, 28 + oy))
+        level_y = 8 + base_hud_size + 4 + oy  # 根据字体大小调整间距
+        surface.blit(level_s, (8 + ox, level_y))
 
-        # Experience bar (below level)
+        # Experience bar (below level) - 调整尺寸和位置
         if hasattr(player, 'get_experience_info'):
             exp_info = player.get_experience_info()
-            exp_bar_w = 120
-            exp_bar_h = 8
+            exp_bar_w = max(120, int(tile_size * 5))  # 根据tile_size调整宽度
+            exp_bar_h = max(8, int(tile_size * 0.35)) # 根据tile_size调整高度
             exp_bar_x = 8 + ox
-            exp_bar_y = 48 + oy
+            exp_bar_y = level_y + base_small_size + 4  # 根据字体大小调整位置
             
             # Background
             pygame.draw.rect(surface, (40, 40, 40), (exp_bar_x, exp_bar_y, exp_bar_w, exp_bar_h))
@@ -195,26 +201,29 @@ def draw_player_hud(surface, player, ox, oy, view_px_w, font_path=None):
             exp_text_s = small_font.render(exp_text, True, (200, 200, 200))
             surface.blit(exp_text_s, (exp_bar_x + exp_bar_w + 5, exp_bar_y - 2))
 
-        # stamina bar at top-right
-        bar_w = 160
-        bar_h = 18
+        # stamina bar at top-right - 调整尺寸
+        bar_w = max(160, int(tile_size * 6.5))  # 根据tile_size调整宽度
+        bar_h = max(18, int(tile_size * 0.75))  # 根据tile_size调整高度
         x = view_px_w - bar_w - 8 + ox
         y = 8 + oy
-        draw_stamina_bar(surface, x, y, bar_w, bar_h, player.stamina, player.max_stamina, font=get_font(font_path, 14))
+        stamina_font_size = max(14, int(tile_size * 0.6))
+        draw_stamina_bar(surface, x, y, bar_w, bar_h, player.stamina, player.max_stamina, font=get_font(font_path, stamina_font_size))
 
-        # cooldown indicator (small) to the left of the bar
+        # cooldown indicator (small) to the left of the bar - 调整尺寸
         cd_pct = max(0.0, min(1.0, player.sprint_cooldown / max(1, player.SPRINT_COOLDOWN_AFTER_EXHAUST)))
         if player.sprint_cooldown > 0:
             try:
                 cx = x - 10
                 cy = y + bar_h // 2
-                radius = int(6 + 6 * cd_pct)
-                radius = max(4, min(12, radius))
+                base_radius = max(6, int(tile_size * 0.25))
+                radius = int(base_radius + base_radius * cd_pct)
+                radius = max(4, min(int(tile_size * 0.5), radius))
                 alpha = int(140 * cd_pct)
                 s = pygame.Surface((radius * 2, radius * 2), pygame.SRCALPHA)
                 pygame.draw.circle(s, (200, 80, 80, alpha), (radius, radius), radius)
                 surface.blit(s, (cx - radius, cy - radius))
-                txt_font = get_font(font_path, 12)
+                cooldown_font_size = max(12, int(tile_size * 0.5))
+                txt_font = get_font(font_path, cooldown_font_size)
                 txt = '疲'
                 txt_s = txt_font.render(txt, True, (255, 255, 255))
                 try:
@@ -228,11 +237,12 @@ def draw_player_hud(surface, player, ox, oy, view_px_w, font_path=None):
             except Exception:
                 pass
         
-        # Level up notification
+        # Level up notification - 调整字体大小
         if hasattr(player, 'level_up_notification') and player.level_up_notification:
             try:
                 notification = player.level_up_notification
-                big_font = get_font(font_path, 24)
+                big_font_size = max(24, int(tile_size * 1.2))
+                big_font = get_font(font_path, big_font_size)
                 
                 # Level up text
                 level_up_text = f"LEVEL UP! {notification['level']}"
@@ -240,7 +250,7 @@ def draw_player_hud(surface, player, ox, oy, view_px_w, font_path=None):
                 
                 # Center horizontally, place in upper middle of screen
                 level_up_x = (view_px_w - level_up_s.get_width()) // 2 + ox
-                level_up_y = 80 + oy
+                level_up_y = max(80, int(tile_size * 3.5)) + oy
                 
                 # Background glow effect
                 glow_surface = pygame.Surface((level_up_s.get_width() + 20, level_up_s.get_height() + 10), pygame.SRCALPHA)

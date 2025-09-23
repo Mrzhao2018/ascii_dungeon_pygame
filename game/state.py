@@ -14,7 +14,9 @@ if TYPE_CHECKING:
 
 class GameStateEnum(Enum):
     """游戏状态枚举"""
+    MAIN_MENU = "main_menu"     # 主菜单状态
     PLAYING = "playing"         # 正常游戏状态
+    PAUSED = "paused"           # 游戏暂停状态
     GAME_OVER = "game_over"     # 游戏结束状态
     RESTART = "restart"         # 重新开始状态
 
@@ -28,8 +30,8 @@ class GameState:
         # Logger (will be set by Game class)
         self.logger: Optional['Logger'] = None
 
-        # 游戏状态
-        self.current_state = GameStateEnum.PLAYING
+        # 游戏状态 - 默认从主菜单开始
+        self.current_state = GameStateEnum.MAIN_MENU
 
         # Level state
         self.level = []
@@ -253,9 +255,17 @@ class GameState:
         if self.logger:
             self.logger.info(f"游戏状态切换: {old_state.value} -> {new_state.value}", "STATE")
 
+    def is_main_menu(self) -> bool:
+        """检查是否在主菜单"""
+        return self.current_state == GameStateEnum.MAIN_MENU
+
     def is_playing(self) -> bool:
         """检查是否在游戏中"""
         return self.current_state == GameStateEnum.PLAYING
+
+    def is_paused(self) -> bool:
+        """检查是否游戏暂停"""
+        return self.current_state == GameStateEnum.PAUSED
 
     def is_game_over(self) -> bool:
         """检查是否游戏结束"""

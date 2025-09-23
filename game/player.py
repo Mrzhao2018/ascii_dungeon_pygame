@@ -78,14 +78,14 @@ class Player:
         self.level_up_notification = None
         self.level_up_timer = 0
 
-    def spawn_sprint_particle(self, tile_x, tile_y, dx, dy):
-        bx = tile_x * 24 + 24 // 2
-        by = tile_y * 24 + 24 // 2
+    def spawn_sprint_particle(self, tile_x, tile_y, dx, dy, tile_size=24):
+        bx = tile_x * tile_size + tile_size // 2
+        by = tile_y * tile_size + tile_size // 2
         p_vx = -dx * (1 + random.random() * 0.6) * 0.6
         p_vy = -dy * (1 + random.random() * 0.6) * 0.6
         self.sprint_particles.append({'x_px': bx, 'y_px': by, 'vx': p_vx, 'vy': p_vy, 'time': 300})
 
-    def update_particles(self, dt, TILE_SIZE=24):
+    def update_particles(self, dt, TILE_SIZE=28):  # 更新默认tile_size
         # progress and remove expired particles
         for p in list(self.sprint_particles):
             p['time'] -= dt

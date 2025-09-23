@@ -42,10 +42,24 @@ class InputHandler:
         """Handle keydown events"""
         result: Dict[str, Any] = {}
 
-        # 检查游戏状态 - 如果是游戏结束状态，只处理重新开始和退出
+        # 检查游戏状态
         from game.state import GameStateEnum
+        
+        # 如果是主菜单状态，只处理主菜单输入
+        if self.game_state.current_state == GameStateEnum.MAIN_MENU:
+            return self._handle_main_menu_input(event)
+        
+        # 如果是暂停状态，只处理暂停菜单输入
+        if self.game_state.current_state == GameStateEnum.PAUSED:
+            return self._handle_pause_menu_input(event)
+        
+        # 如果是游戏结束状态，只处理重新开始和退出
         if self.game_state.current_state == GameStateEnum.GAME_OVER:
             return self._handle_game_over_input(event)
+
+        # 在游戏进行状态下，检查暂停键 (ESC)
+        if event.key == pygame.K_ESCAPE:
+            return {'pause_game': True}
 
         # Skip input during floor transition
         if self.game_state.floor_transition:
@@ -115,6 +129,24 @@ class InputHandler:
                 result['toggle_debug_panel'] = debug_panel_keys[event.key]
                 return result
 
+        return result
+
+    def _handle_main_menu_input(self, event) -> Dict[str, Any]:
+        """处理主菜单状态下的输入"""
+        result: Dict[str, Any] = {}
+        
+        # Enter键 - 开始游戏
+        if event.key == pygame.K_RETURN:
+            from game.state import GameStateEnum
+            self.game_state.set_game_state(GameStateEnum.PLAYING)
+            result['start_game'] = True
+            return result
+        
+        # ESC键 - 退出游戏
+        if event.key == pygame.K_ESCAPE:
+            result['quit'] = True
+            return result
+        
         return result
 
     def _handle_game_over_input(self, event) -> Dict[str, Any]:
@@ -213,5 +245,22 @@ class InputHandler:
                 self.game_state.pending_target = None
                 if hasattr(self.game_state, 'logger') and self.game_state.logger:
                     self.game_state.logger.warning("Tab pressed but no exit_pos available", "TAB")
+        
+        return {}
+
+    def _handle_pause_menu_input(self, event) -> Dict[str, Any]:
+        """处理暂停菜单输入"""
+        if event.key == pygame.K_ESCAPE:
+            # ESC - 继续游戏
+            return {'resume_game': True}
+        elif event.key == pygame.K_RETURN:
+            # Enter - 重新开始游戏
+            return {'restart_game': True}
+        elif event.key == pygame.K_m:
+            # M - 返回主菜单
+            return {'goto_main_menu': True}
+        elif event.key == pygame.K_q:
+            # Q - 退出游戏
+            return {'quit': True}
         
         return {}

@@ -168,9 +168,9 @@ class GameConfig:
         self.map_width = map_w or self._get_config_value('game.map_width', 100)
         self.map_height = map_h or self._get_config_value('game.map_height', 40)
 
-        # View parameters
-        self.view_width = self.parse_int_arg('--view-w', 24)
-        self.view_height = self.parse_int_arg('--view-h', 16)
+        # View parameters - 增大默认视图尺寸以获得更大的游戏界面
+        self.view_width = self.parse_int_arg('--view-w', 40)  # 从 24 增加到 40
+        self.view_height = self.parse_int_arg('--view-h', 30) # 从 16 增加到 30
 
         # Generator parameters
         self.rooms = self.parse_int_arg('--rooms', None) or self._get_config_value('game.rooms', 18)
@@ -241,8 +241,8 @@ class GameConfig:
             'debug.max_debug_levels', 3
         )
 
-        # Display parameters
-        self.tile_size = 24
+        # Display parameters - 增大瓦片大小以获得更好的视觉效果
+        self.tile_size = 28  # 从 24 增加到 28
         self.fps = 30
 
         # Logging and debug configuration
@@ -299,8 +299,8 @@ PyGame 字符地牢探索游戏 - 命令行参数
   --seed <数字>           随机种子
 
 显示设置:
-  --view-w <数字>         视窗宽度(瓦片) (默认: 24)
-  --view-h <数字>         视窗高度(瓦片) (默认: 16)
+  --view-w <数字>         视窗宽度(瓦片) (默认: 40)
+  --view-h <数字>         视窗高度(瓦片) (默认: 30)
   --show-fps              显示FPS
   --show-coords           显示坐标
 
