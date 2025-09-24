@@ -9,7 +9,7 @@ Game state management
 
 
 if TYPE_CHECKING:
-    from game.logging import Logger
+    from game.logger import Logger
 
 
 class GameStateEnum(Enum):
@@ -32,13 +32,14 @@ class GameState:
 
         # 游戏状态 - 默认从主菜单开始
         self.current_state = GameStateEnum.MAIN_MENU
-
         # Level state
         self.level = []
         self.width = 0
         self.height = 0
         self.floor_number = 1
         self.exit_pos = None
+        # Backwards-compatible alias used by older tests/code
+        self.show_exit_indicator = False
 
         # Dialog state
         self.dialog_active = False
@@ -65,8 +66,26 @@ class GameState:
     def set_level(self, level: List[str]):
         """Set the current level and update dimensions"""
         self.level = level
-        self.width = len(level[0]) if level else 0
-        self.height = len(level)
+        # Accept list-of-strings or list-of-list-of-chars
+        try:
+            self.width = len(level[0]) if level else 0
+            self.height = len(level)
+        except Exception:
+            self.width = 0
+            self.height = 0
+
+    def get_level(self):
+        """Return the current level structure (alias for tests)"""
+        return self.level
+
+    @property
+    def floor(self) -> int:
+        """Compatibility alias for floor_number"""
+        return self.floor_number
+
+    @floor.setter
+    def floor(self, v: int):
+        self.floor_number = v
 
     def compute_exit_pos(self):
         """Find the exit position in the current level"""
@@ -121,6 +140,15 @@ class GameState:
 
         self.floor_transition = {'time': 1100, 'text': f'第 {floor_number} 层'}
 
+    def increment_floor(self):
+        """Increment the floor number (compatibility for tests)."""
+        self.floor_number += 1
+        # Keep alias in sync
+        try:
+            self.floor = self.floor_number
+        except Exception:
+            pass
+
     def update_floor_transition(self, dt: int) -> bool:
         """Update floor transition timer. Returns True if transition completed."""
         if not self.floor_transition:
@@ -148,9 +176,17 @@ class GameState:
             if self.screen_shake < 0:
                 self.screen_shake = 0
 
+    def is_screen_shaking(self) -> bool:
+        """Compatibility helper: is any screen shake active?"""
+        return self.screen_shake > 0
+
     def add_screen_shake(self):
         """Add screen shake effect"""
         self.screen_shake = self.config.screen_shake_time
+
+    def trigger_screen_shake(self):
+        """Backward-compatible alias expected by tests."""
+        self.add_screen_shake()
 
     def update_enemy_flash(self, dt: int):
         """Update enemy flash effects"""
@@ -162,6 +198,76 @@ class GameState:
     def add_enemy_flash(self, entity_id: int):
         """Add enemy flash effect"""
         self.enemy_flash[entity_id] = 200
+
+    # --- Backwards-compatible camera helpers expected by tests ---
+    def set_camera(self, x: int, y: int):
+        """Set camera position directly (tests expect this)."""
+        self.cam_x = x
+        self.cam_y = y
+
+    # --- Floating text compatibility ---
+    def add_floating_text(self, text: str, x: int, y: int, color=None, duration_ms: int = 1000):
+        """Compatibility wrapper used by tests and older code.
+
+        Adds both 'duration' and 'time' keys for compatibility with different consumers.
+        """
+        entry = {
+            'text': text,
+            'x': x,
+            'y': y,
+            'color': color,
+            'duration': duration_ms,
+            'time': duration_ms,
+        }
+        self.floating_texts.append(entry)
+
+    def update_floating_texts(self, dt: int):
+        """Update floating text durations (compat for tests).
+
+        dt is milliseconds.
+        """
+        for ft in list(self.floating_texts):
+            # Update both duration and time if present
+            if 'duration' in ft:
+                ft['duration'] -= dt
+            if 'time' in ft:
+                ft['time'] -= dt
+
+            # If either indicator marks expiry, remove
+            dur = ft.get('duration', ft.get('time', 0))
+            if dur <= 0:
+                try:
+                    self.floating_texts.remove(ft)
+                except ValueError:
+                    pass
+
+    def is_valid_position(self, x: int, y: int) -> bool:
+        """Return True if (x,y) is a valid tile coordinate in the current level."""
+        if not self.level:
+            return False
+        if x < 0 or y < 0:
+            return False
+        if y >= len(self.level):
+            return False
+        row = self.level[y]
+        try:
+            return 0 <= x < len(row)
+        except Exception:
+            return False
+
+    def get_tile(self, x: int, y: int):
+        """Return the tile at (x,y) or None if out of bounds. Supports list-of-strings or list-of-lists."""
+        if not self.is_valid_position(x, y):
+            return None
+        row = self.level[y]
+        try:
+            # row might be a string or list
+            return row[x]
+        except Exception:
+            try:
+                return row[x]
+            except Exception:
+                return None
 
     def game_log(self, msg: str):
         """Add a debug log message"""
@@ -295,3 +401,13 @@ class GameState:
             self.pending_target = None
             if self.logger:
                 self.logger.warning("新楼层没有出口，已隐藏方位指示器", "INDICATOR")
+
+    def toggle_exit_indicator(self):
+        """API expected by tests to toggle the exit indicator on/off."""
+        self.show_exit_indicator = not bool(self.show_exit_indicator)
+        if self.show_exit_indicator:
+            # Refresh to compute a target if possible
+            try:
+                self.refresh_exit_indicator(self.config.tile_size)
+            except Exception:
+                pass

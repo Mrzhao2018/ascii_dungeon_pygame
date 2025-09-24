@@ -16,11 +16,33 @@ class FloorManager:
         self.config = config
         self.game_state = game_state
 
+    def _prefer_log(self, msg: str, level: str = 'info'):
+        try:
+            if getattr(self, 'game_state', None) and hasattr(self.game_state, 'game_log'):
+                try:
+                    self.game_state.game_log(msg)
+                    return
+                except Exception:
+                    pass
+        except Exception:
+            pass
+        try:
+            print(msg)
+        except Exception:
+            pass
+
     def generate_initial_level(self) -> List[str]:
         """Generate the initial level based on configuration"""
         if self.config.regen:
-            print('[FloorManager] --regen flag detected: forcing dungeon regeneration')
-            return utils.generate_dungeon(self.config.map_width, self.config.map_height, seed=int(time.time() * 1000))
+            try:
+                self._prefer_log('[FloorManager] --regen flag detected: forcing dungeon regeneration', level='info')
+            except Exception:
+                try:
+                    print('[FloorManager] --regen flag detected: forcing dungeon regeneration')
+                except Exception:
+                    pass
+            from .utils import get_seed
+            return utils.generate_dungeon(self.config.map_width, self.config.map_height, seed=get_seed())
         else:
             # If user specified map dimensions, generate new map
             if hasattr(self.config, 'map_w') or hasattr(self.config, 'map_h'):

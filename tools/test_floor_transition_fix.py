@@ -41,13 +41,15 @@ def test_floor_transition_fix():
         
         print(f'Starting floor transition to {floor_number}')
         
+        from game.utils import get_seed
+
         if seed is None:
-            gen_seed = int(time.time() * 1000)
+            gen_seed = get_seed()
         else:
             try:
                 gen_seed = int(seed) + floor_number
             except Exception:
-                gen_seed = int(time.time() * 1000)
+                gen_seed = get_seed()
         
         # CRITICAL FIX: Set pending_floor with generation parameters
         pending_floor = {

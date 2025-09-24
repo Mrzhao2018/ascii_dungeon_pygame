@@ -32,8 +32,8 @@ __description__ = "PyGame 字符地牢探索游戏"
 from .config import GameConfig
 from .state import GameState
 from .game import Game
-from .logging import Logger, ErrorHandler
+from .logger import Logger, ErrorHandler, create_performance_timer
 from .debug import DebugOverlay
 from .performance import PerformanceOptimizer
 
-__all__ = ['GameConfig', 'GameState', 'Game', 'Logger', 'ErrorHandler', 'DebugOverlay', 'PerformanceOptimizer']
+__all__ = ['GameConfig', 'GameState', 'Game', 'Logger', 'ErrorHandler', 'create_performance_timer', 'DebugOverlay', 'PerformanceOptimizer']

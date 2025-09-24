@@ -22,9 +22,9 @@ def test_floor_transition_detailed():
     max_room = 16
     corridor_radius = 1
     
-    # Use a fixed seed to reproduce the issue
-    import time
-    gen_seed = int(time.time() * 1000)
+    # Use a reproducible seed helper
+    from game.utils import get_seed
+    gen_seed = get_seed()
     print(f"Using seed: {gen_seed}")
     
     # Step 1: Generate dungeon (same as main.py)

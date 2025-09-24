@@ -127,6 +127,45 @@ class EntityManager:
         self.entities_by_id: Dict[int, Entity] = {}
         self._next_id = 1
         self.move_cooldown = 0
+        # Optional runtime-injected references (set by Game or controllers)
+        self.logger = None
+        self.game_state = None
+
+    def _prefer_log(self, msg: str, level: str = 'debug'):
+        try:
+            if getattr(self, 'logger', None):
+                try:
+                    if level == 'debug' and hasattr(self.logger, 'debug'):
+                        self.logger.debug(msg, 'ENTITY')
+                        return
+                    if level == 'info' and hasattr(self.logger, 'info'):
+                        self.logger.info(msg, 'ENTITY')
+                        return
+                    if level == 'warning' and hasattr(self.logger, 'warning'):
+                        self.logger.warning(msg, 'ENTITY')
+                        return
+                    if level == 'error' and hasattr(self.logger, 'error'):
+                        self.logger.error(msg, 'ENTITY')
+                        return
+                except Exception:
+                    pass
+
+            if getattr(self, 'game_state', None) and hasattr(self.game_state, 'game_log'):
+                try:
+                    self.game_state.game_log(msg)
+                    return
+                except Exception:
+                    pass
+
+            try:
+                print(msg)
+            except Exception:
+                pass
+        except Exception:
+            try:
+                print(msg)
+            except Exception:
+                pass
 
     def add(self, ent: Entity):
         if getattr(ent, 'id', None) is None:
@@ -198,8 +237,12 @@ class EntityManager:
 
     def save_to_file(self, path: str):
         data = {'entities': self.to_config_list()}
-        with open(path, 'w', encoding='utf-8') as f:
-            json.dump(data, f, ensure_ascii=False, indent=2)
+        try:
+            from game.utils import write_json_atomic
+            write_json_atomic(path, data, ensure_ascii=False, indent=2)
+        except Exception:
+            with open(path, 'w', encoding='utf-8') as f:
+                json.dump(data, f, ensure_ascii=False, indent=2)
 
     def load_from_file(self, path: str):
         if not os.path.exists(path):
@@ -345,8 +388,12 @@ class EntityManager:
             for (ex, ey), ent in list(self.entities_by_pos.items()):
                 if 0 <= ey < len(level) and 0 <= ex < len(level[0]):
                     if level[ey][ex] != 'E':
-                        # diagnostic and fix
-                        print(f'[entity-debug] fixing map tile for entity at ({ex},{ey}) from "{level[ey][ex]}" to "E"')
+                        # diagnostic and fix (use logger if available)
+                        try:
+                            log_msg = f'[entity-debug] fixing map tile for entity at ({ex},{ey}) from "{level[ey][ex]}" to "E"'
+                            self._prefer_log(log_msg, level='debug')
+                        except Exception:
+                            pass
                         set_tile(level, ex, ey, 'E')
         except Exception:
             pass

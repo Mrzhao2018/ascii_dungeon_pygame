@@ -16,7 +16,7 @@ sys.path.insert(0, str(project_root))
 
 try:
     from tools.folder_manager import FolderManager
-    from game.logging import Logger
+    from game.logger import Logger
 except ImportError as e:
     print(f"导入错误: {e}")
     print("请确保从项目根目录运行此脚本")

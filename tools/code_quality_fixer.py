@@ -57,7 +57,7 @@ def fix_import_issues():
         "game/error_handling.py": ["os", "sys", "json", "Path", "List", "Union", "timedelta"],
         "game/game.py": ["os", "Optional", "create_performance_timer", "dialogs_mod"],
         "game/input.py": ["Tuple", "Optional", "Callable"],
-        "game/logging.py": ["sys"],
+    "game/logger.py": ["sys"],
         "game/memory.py": ["Tuple", "threading"],
         "game/performance.py": ["threading", "os", "Optional"],
         "game/player.py": ["pygame"],

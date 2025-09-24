@@ -510,7 +510,7 @@ Main game class that orchestrates all game systems
 - `from game.floors import FloorManager`
 - `from game.renderer import Renderer`
 - `from game.player import Player`
-- `from game.logging import Logger, ErrorHandler, create_performance_timer`
+- `from game.logger import Logger, ErrorHandler, create_performance_timer`
 - `from game import entities, dialogs, audio`
 - `from game.utils import set_tile`
 
@@ -868,7 +868,7 @@ Rendering management for the game
 - `from typing import List, Optional, Tuple`
 - `from game import ui, utils`
 - `from game.debug import DebugOverlay`
-- `from game.logging import Logger`
+- `from game.logger import Logger`
 
 ### 类
 

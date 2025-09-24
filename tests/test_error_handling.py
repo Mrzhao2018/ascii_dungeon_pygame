@@ -17,7 +17,7 @@ from game.error_handling import (
     ErrorRecoveryManager, RobustErrorHandler,
     safe_operation, initialize_global_error_handler, get_global_error_handler
 )
-from game.logging import Logger
+from game.logger import Logger
 from game.config import GameConfig
 
 

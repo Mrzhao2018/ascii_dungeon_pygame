@@ -2,6 +2,33 @@ import os
 import json
 import pygame
 from typing import Optional
+import time
+from pathlib import Path
+
+
+def get_seed() -> int:
+    """Return a millisecond-resolution seed based on current time.
+
+    Centralizes the seed generation logic so callers can mock or override easily for tests.
+    """
+    return int(time.time() * 1000)
+
+
+def write_json_atomic(path: str, data, *, encoding: str = 'utf-8', indent: int = 2, ensure_ascii: bool = False) -> None:
+    """Write JSON to a file atomically by writing to a temp file then replacing.
+
+    This central helper avoids repeating the NamedTemporaryFile + replace pattern.
+    """
+    import tempfile
+    import os
+
+    p = Path(path)
+    p.parent.mkdir(parents=True, exist_ok=True)
+    # create temp file in same directory to allow atomic replace
+    with tempfile.NamedTemporaryFile('w', delete=False, dir=str(p.parent), encoding=encoding) as tf:
+        json.dump(data, tf, indent=indent, ensure_ascii=ensure_ascii)
+        temp_name = tf.name
+    os.replace(temp_name, str(p))
 
 def find_player(level):
     for y, row in enumerate(level):

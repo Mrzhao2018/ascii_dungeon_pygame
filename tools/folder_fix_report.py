@@ -59,7 +59,7 @@ def generate_fix_report():
     print("🔧 修复的代码文件:")
     print("  ✅ game/utils.py - 关卡文件保存到 levels/ 子文件夹")
     print("  ✅ game/floors.py - 地图文件保存到 maps/ 子文件夹")
-    print("  ✅ game/logging.py - 日志文件保存到对应子文件夹")
+    print("  ✅ game/logger.py - 日志文件保存到对应子文件夹")
     print("  ✅ tools/folder_manager.py - 递归扫描子文件夹")
     print()
     

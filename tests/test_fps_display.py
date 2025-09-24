@@ -13,7 +13,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from game.config import GameConfig
 from game.debug import DebugOverlay
-from game.logging import Logger
+from game.logger import Logger
 
 
 def test_fps_display():

@@ -76,7 +76,12 @@ class Logger:
         try:
             os.makedirs(self.debug_dir, exist_ok=True)
         except Exception as e:
-            print(f"Warning: Could not create debug directory: {e}")
+            # Use internal warning method; if that fails fall back to a minimal print
+            try:
+                self.warning(f"Could not create debug directory: {e}", "LOGGER")
+            except Exception:
+                # keep only a minimal console message to aid debugging in very early init
+                print(f"Warning: Could not create debug directory: {e}")
 
         # Initialize enhanced error handling
         if ERROR_HANDLING_AVAILABLE:
@@ -121,7 +126,11 @@ class Logger:
                         file_time = datetime.fromtimestamp(log_file.stat().st_mtime)
                         if file_time < cutoff_time:
                             log_file.unlink()
-                            print(f"Removed old log: {log_file}")
+                            try:
+                                self.info(f"Removed old log: {log_file}", "LOGGER")
+                            except Exception:
+                                # minimal fallback
+                                print(f"Removed old log: {log_file}")
                     except Exception:
                         continue
 
@@ -134,12 +143,18 @@ class Logger:
                     for old_file in remaining_files[self.max_log_files :]:
                         try:
                             old_file.unlink()
-                            print(f"Removed excess log: {old_file}")
+                            try:
+                                self.info(f"Removed excess log: {old_file}", "LOGGER")
+                            except Exception:
+                                print(f"Removed excess log: {old_file}")
                         except Exception:
                             continue
 
         except Exception as e:
-            print(f"Warning: Failed to cleanup old logs: {e}")
+            try:
+                self.warning(f"Failed to cleanup old logs: {e}", "LOGGER")
+            except Exception:
+                print(f"Warning: Failed to cleanup old logs: {e}")
 
     def _should_log(self, level: str, category: str) -> bool:
         """Determine if a message should be logged based on filters"""
@@ -170,21 +185,33 @@ class Logger:
     def warning(self, msg: str, category: str = "WARN"):
         """Log warning message"""
         self._log(msg, "WARN", category)
-        print(f"WARNING: {msg}")  # Also print to console
+        # Also print minimally to console for visibility in early stages
+        try:
+            print(f"WARNING: {msg}")
+        except Exception:
+            pass
 
     def error(self, msg: str, category: str = "ERROR", exception: Optional[Exception] = None):
         """Log error message with optional exception"""
         self.error_stats['total_errors'] += 1
         self._log(msg, "ERROR", category)
         self._log_to_error_file(msg, "ERROR", category, exception)
-        print(f"ERROR: {msg}")  # Also print to console
+        # Also print minimally to console for visibility in early stages
+        try:
+            print(f"ERROR: {msg}")
+        except Exception:
+            pass
 
         if exception:
             tb = traceback.format_exception(type(exception), exception, exception.__traceback__)
             tb_str = ''.join(tb)
             self._log(f"Exception details:\n{tb_str}", "ERROR", category)
             self._log_to_error_file(f"Exception details:\n{tb_str}", "ERROR", category)
-            print(tb_str)
+            # Print stacktrace minimally to console to help debugging
+            try:
+                print(tb_str)
+            except Exception:
+                pass
 
     def critical(self, msg: str, category: str = "CRITICAL", exception: Optional[Exception] = None):
         """Log critical error message"""
@@ -192,14 +219,21 @@ class Logger:
         self.error_stats['critical_errors'] += 1
         self._log(msg, "CRITICAL", category)
         self._log_to_error_file(msg, "CRITICAL", category, exception)
-        print(f"CRITICAL: {msg}")
+        # Print critical messages minimally to console
+        try:
+            print(f"CRITICAL: {msg}")
+        except Exception:
+            pass
 
         if exception:
             tb = traceback.format_exception(type(exception), exception, exception.__traceback__)
             tb_str = ''.join(tb)
             self._log(f"Critical exception details:\n{tb_str}", "CRITICAL", category)
             self._log_to_error_file(f"Critical exception details:\n{tb_str}", "CRITICAL", category)
-            print(tb_str)
+            try:
+                print(tb_str)
+            except Exception:
+                pass
 
     def _log(self, msg: str, level: str, category: str):
         """Internal logging method with filtering and size control"""

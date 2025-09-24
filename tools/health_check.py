@@ -48,7 +48,7 @@ def check_game_files():
         'game/game.py',
         'game/player.py',
         'game/entities.py',
-        'game/logging.py',
+        'game/logger.py',
         'game/debug.py',
         'game/performance.py',
         'data/',
@@ -171,7 +171,7 @@ def run_basic_import_test():
         'game.floors',
         'game.renderer',
         'game.game',
-        'game.logging',
+        'game.logger',
         'game.debug',
         'game.performance'
     ]
@@ -217,11 +217,10 @@ def test_game_instantiation():
         from game.state import GameState
         game_state = GameState(config)
         print("GameState: ✓")
-        
-        from game.logging import Logger
+        from game.logger import Logger
         logger = Logger(config)
         print("Logger: ✓")
-        
+
         # Don't try to create full Game instance as it requires pygame init
         print("Basic instantiation: ✓")
         

@@ -4,7 +4,7 @@
 """
 
 # 在 game/config.py 中添加日志控制选项
-# 在 game/logging.py 中实现日志轮转和大小限制
+# 在 game/logger.py 中实现日志轮转和大小限制
 
 # 日志配置优化
 LOGGING_CONFIG = {

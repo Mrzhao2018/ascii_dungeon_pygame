@@ -164,7 +164,7 @@ class TestGameStateEdgeCases(unittest.TestCase):
         self.assertIsNone(self.game_state.exit_pos)
         
     def test_game_logs(self):
-        """Test game logging functionality"""
+        """Test game log storage and access"""
         # Initially empty
         self.assertEqual(len(self.game_state.game_logs), 0)
         

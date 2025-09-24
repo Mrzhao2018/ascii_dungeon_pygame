@@ -6,12 +6,12 @@
     "vsync": true
   },
   "game": {
-    "map_width": 80,
-    "map_height": 30,
-    "rooms": 12,
-    "enemies": 5,
-    "debug": true,
-    "seed": 12345
+    "map_width": 100,
+    "map_height": 40,
+    "rooms": 18,
+    "enemies": 8,
+    "debug": false,
+    "seed": null
   },
   "player": {
     "sprint_multiplier": 0.6,

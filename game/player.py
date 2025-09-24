@@ -78,6 +78,13 @@ class Player:
         self.level_up_notification = None
         self.level_up_timer = 0
 
+    @property
+    def move_cooldown_timer(self):
+        """Compatibility alias for older debug overlay field name.
+        Returns the remaining move timer in milliseconds as an int.
+        """
+        return int(getattr(self, "move_timer", 0))
+
     def spawn_sprint_particle(self, tile_x, tile_y, dx, dy, tile_size=24):
         bx = tile_x * tile_size + tile_size // 2
         by = tile_y * tile_size + tile_size // 2

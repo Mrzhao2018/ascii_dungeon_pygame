@@ -50,7 +50,11 @@ class ConfigFile:
             elif self.format == "ini":
                 return self._load_ini()
         except Exception as e:
-            print(f"Error loading config file: {e}")
+            try:
+                import logging
+                logging.getLogger(__name__).error(f"Error loading config file: {e}")
+            except Exception:
+                print(f"Error loading config file: {e}")
             return False
 
         return False
@@ -70,7 +74,11 @@ class ConfigFile:
             elif self.format == "ini":
                 return self._save_ini()
         except Exception as e:
-            print(f"Error saving config file: {e}")
+            try:
+                import logging
+                logging.getLogger(__name__).error(f"Error saving config file: {e}")
+            except Exception:
+                print(f"Error saving config file: {e}")
             return False
 
         return False
@@ -83,8 +91,13 @@ class ConfigFile:
 
     def _save_json(self) -> bool:
         """Save JSON configuration"""
-        with open(self.config_path, 'w', encoding='utf-8') as f:
-            json.dump(self.data, f, indent=2, ensure_ascii=False)
+        try:
+            from .utils import write_json_atomic
+            write_json_atomic(str(self.config_path), self.data, ensure_ascii=False, indent=2)
+        except Exception:
+            # fallback to simple write
+            with open(self.config_path, 'w', encoding='utf-8') as f:
+                json.dump(self.data, f, indent=2, ensure_ascii=False)
         return True
 
     def _load_ini(self) -> bool:
@@ -358,6 +371,9 @@ def create_sample_configs():
     }
     ini_config.save()
 
+    # Use print here to avoid importing the logging module during the
+    # demo (importing 'logging' from inside the package can inadvertently
+    # trigger a circular import with game.logger which imports pygame).
     print("Sample configuration files created:")
     print("- config/game.json")
     print("- config/game.ini")
@@ -365,6 +381,7 @@ def create_sample_configs():
 
 if __name__ == "__main__":
     # Demo configuration file usage
+
     create_sample_configs()
 
     # Test JSON config

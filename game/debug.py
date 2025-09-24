@@ -153,13 +153,21 @@ class DebugOverlay:
         title_surf = self.font.render("Game State", True, (255, 255, 0))  # type: ignore
         screen.blit(title_surf, (x + 5, y + 5))
 
-        # Game state info
+        # Game state info (use getattr fallbacks)
+        floor = getattr(game_state, 'floor_number', 0)
+        width = getattr(game_state, 'width', 0)
+        height = getattr(game_state, 'height', 0)
+        cam_x = getattr(game_state, 'cam_x', 0.0)
+        cam_y = getattr(game_state, 'cam_y', 0.0)
+        dialog_active = getattr(game_state, 'dialog_active', False)
+        floor_transition = getattr(game_state, 'floor_transition', None)
+
         info_lines = [
-            f"Floor: {game_state.floor_number}",
-            f"Level: {game_state.width}x{game_state.height}",
-            f"Camera: ({game_state.cam_x:.0f}, {game_state.cam_y:.0f})",
-            f"Dialog: {game_state.dialog_active}",
-            f"Transition: {game_state.floor_transition is not None}",
+            f"Floor: {floor}",
+            f"Level: {width}x{height}",
+            f"Camera: ({cam_x:.0f}, {cam_y:.0f})",
+            f"Dialog: {dialog_active}",
+            f"Transition: {floor_transition is not None}",
         ]
 
         line_y = y + 25
@@ -181,15 +189,28 @@ class DebugOverlay:
         title_surf = self.font.render("Player", True, (255, 255, 0))
         screen.blit(title_surf, (x + 5, y + 5))
 
-        # Player info
+        # Player info (use getattr fallbacks to avoid crashing when attributes are missing)
         if player:
+            pos_x = getattr(player, 'x', 0)
+            pos_y = getattr(player, 'y', 0)
+            hp = getattr(player, 'hp', 0)
+            max_hp = getattr(player, 'max_hp', 10)
+            stamina = getattr(player, 'stamina', 0.0)
+            max_stamina = getattr(player, 'max_stamina', 100.0)
+            sprint_cd = getattr(player, 'sprint_cooldown', 0)
+            # support both legacy 'move_cooldown_timer' and current 'move_timer'
+            move_cd = getattr(player, 'move_cooldown_timer', None)
+            if move_cd is None:
+                move_cd = getattr(player, 'move_timer', 0)
+            i_frames = getattr(player, 'i_frames', 0)
+
             info_lines = [
-                f"Pos: ({player.x}, {player.y})",
-                f"HP: {player.hp}/10",
-                f"Stamina: {player.stamina:.1f}/{player.max_stamina}",
-                f"Sprint CD: {player.sprint_cooldown}ms",
-                f"Move CD: {player.move_cooldown_timer}ms",
-                f"I-Frames: {player.i_frames}ms",
+                f"Pos: ({pos_x}, {pos_y})",
+                f"HP: {hp}/{max_hp}",
+                f"Stamina: {stamina:.1f}/{max_stamina}",
+                f"Sprint CD: {int(sprint_cd)}ms",
+                f"Move CD: {int(move_cd)}ms",
+                f"I-Frames: {int(i_frames)}ms",
             ]
 
             line_y = y + 25
@@ -248,7 +269,8 @@ class DebugOverlay:
 
         # Dynamic width based on screen size
         panel_width = min(600, screen_width - x - 10)
-        panel_height = min(150, len(self.logger.game_logs) * 16 + 30)
+        game_logs = getattr(self.logger, 'game_logs', [])
+        panel_height = min(150, len(game_logs) * 16 + 30)
 
         # Background
         panel_surf = pygame.Surface((panel_width, panel_height), pygame.SRCALPHA)
@@ -261,7 +283,7 @@ class DebugOverlay:
 
         # Log entries
         line_y = y + 25
-        for log_entry in self.logger.game_logs[-8:]:  # Show last 8 entries
+        for log_entry in game_logs[-8:]:  # Show last 8 entries
             # Truncate long log lines
             if len(log_entry) > 60:
                 display_text = log_entry[:57] + "..."
@@ -319,8 +341,12 @@ class DebugOverlay:
         """Render player coordinates"""
         if not player:
             return
+        pos_x = getattr(player, 'x', 0)
+        pos_y = getattr(player, 'y', 0)
+        cam_x = getattr(game_state, 'cam_x', 0.0)
+        cam_y = getattr(game_state, 'cam_y', 0.0)
 
-        coord_text = f"Pos: ({player.x}, {player.y}) | Cam: ({game_state.cam_x:.0f}, {game_state.cam_y:.0f})"
+        coord_text = f"Pos: ({pos_x}, {pos_y}) | Cam: ({cam_x:.0f}, {cam_y:.0f})"
         surf = self.font.render(coord_text, True, (255, 255, 255))
 
         x = screen.get_width() - surf.get_width() - 10

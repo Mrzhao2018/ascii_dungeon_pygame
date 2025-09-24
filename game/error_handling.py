@@ -443,7 +443,17 @@ def safe_operation(operation_name: str, severity: ErrorSeverity = ErrorSeverity.
                 try:
                     return func(*args, **kwargs)
                 except Exception as e:
-                    print(f"Error in {operation_name}: {e}")
+                    try:
+                        # Try to use module logger if available
+                        if 'logger' in globals() and globals()['logger']:
+                            try:
+                                globals()['logger'].error(f"Error in {operation_name}: {e}", "ERROR")
+                            except Exception:
+                                print(f"Error in {operation_name}: {e}")
+                        else:
+                            print(f"Error in {operation_name}: {e}")
+                    except Exception:
+                        pass
                     return None
 
             return wrapper

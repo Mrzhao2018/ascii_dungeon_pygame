@@ -1,5 +1,4 @@
 import pygame
-import pygame
 import math
 from typing import Dict, Optional, Tuple, Callable, Any
 
@@ -31,7 +30,9 @@ def add_levelup_text(game_state, text: str, x_px: int, y_px: int):
 
 # 简单字体缓存，避免重复创建 Font 对象
 # Font cache to avoid reloading fonts
-_font_cache: Dict[Tuple[str, int], pygame.font.Font] = {}
+# Use Any for the value type to avoid accessing pygame.font at import time
+# which can fail when tests inject a minimal MockPygame without font.
+_font_cache: Dict[Tuple[str, int], Any] = {}
 
 
 def get_font(path_or_none, size):
@@ -364,10 +365,16 @@ def draw_target_indicator(surface, player, target_pos, cam_x, cam_y, ox, oy, vie
             surface, (200, 200, 80), [(int(p1[0]), int(p1[1])), (int(p2[0]), int(p2[1])), (int(p3[0]), int(p3[1]))]
         )
     except Exception as e:
-        # Log the error instead of silently ignoring it
-        print(f"Error in draw_target_indicator: {e}")
-        import traceback
-        traceback.print_exc()
+        # Prefer to surface the error via console minimally; avoid importing project logging here
+        try:
+            print(f"Error in draw_target_indicator: {e}")
+        except Exception:
+            pass
+        try:
+            import traceback
+            traceback.print_exc()
+        except Exception:
+            pass
 
 
 def draw_sprint_particles(surface, player, world_to_screen: Optional[Callable], font):

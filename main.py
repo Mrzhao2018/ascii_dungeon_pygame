@@ -5,6 +5,7 @@ PyGame 字符地牢探索游戏
 """
 
 import sys
+import logging
 from game.game import Game
 
 
@@ -14,11 +15,9 @@ def main():
         game = Game()
         game.run()
     except KeyboardInterrupt:
-        print("\n游戏被用户中断")
+        logging.info("游戏被用户中断")
     except Exception as e:
-        print(f"游戏运行时发生错误: {e}")
-        import traceback
-        traceback.print_exc()
+        logging.exception("游戏运行时发生错误: %s", e)
         return 1
     
     return 0

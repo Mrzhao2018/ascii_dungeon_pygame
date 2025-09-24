@@ -45,15 +45,15 @@ def test_variable_scope_fix():
     try:
         # Simulate the floor transition logic (the part that was failing)
         floor_number = 2
-        import time
-        
+        from game.utils import get_seed
+
         if seed is None:
-            gen_seed = int(time.time() * 1000)
+            gen_seed = get_seed()
         else:
             try:
                 gen_seed = int(seed) + floor_number
             except Exception:
-                gen_seed = int(time.time() * 1000)
+                gen_seed = get_seed()
         
         # This was the line causing UnboundLocalError before the fix
         pending_floor = {

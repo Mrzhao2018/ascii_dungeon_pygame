@@ -8,7 +8,7 @@ from game.input import InputHandler
 from game.floors import FloorManager
 from game.renderer import Renderer
 from game.player import Player
-from game.logging import Logger, ErrorHandler
+from game.logger import Logger, ErrorHandler
 from game.performance import PerformanceOptimizer
 from game.debug_controls import toggle_debug_mode, toggle_panel
 from game.perf_controller import log_performance_stats
@@ -108,11 +108,51 @@ class Game:
             self.logger.error("Failed to initialize game", "GAME", e)
             raise
 
+    def _prefer_log(self, msg: str, level: str = 'info') -> None:
+        """Prefer the persistent logger, then in-game game_log, then console print as last resort."""
+        try:
+            if getattr(self, 'logger', None):
+                try:
+                    if level == 'debug' and hasattr(self.logger, 'debug'):
+                        self.logger.debug(msg, 'GAME')
+                        return
+                    if level == 'warning' and hasattr(self.logger, 'warning'):
+                        self.logger.warning(msg, 'GAME')
+                        return
+                    if level == 'error' and hasattr(self.logger, 'error'):
+                        self.logger.error(msg, 'GAME')
+                        return
+                    # default to info
+                    if hasattr(self.logger, 'info'):
+                        self.logger.info(msg, 'GAME')
+                        return
+                except Exception:
+                    pass
+
+            if getattr(self, 'game_state', None) and hasattr(self.game_state, 'game_log'):
+                try:
+                    self.game_state.game_log(msg)
+                    return
+                except Exception:
+                    pass
+
+            # Fallback to printing to console
+            try:
+                print(msg)
+            except Exception:
+                pass
+        except Exception:
+            try:
+                print(msg)
+            except Exception:
+                pass
+
     def _initialize_game_world(self):
         """Initialize the game world (level, player, etc.) via session controller."""
         player = initialize_game_world(self.config, self.game_state, self.floor_manager)
         if not player:
-            print("未找到玩家 '@'，请在地图中放置玩家")
+            # 使用 logger 记录并优雅退出
+            self._prefer_log("未找到玩家 '@'，请在地图中放置玩家", level='error')
             pygame.quit()
             sys.exit(1)
         self.player = player
@@ -132,7 +172,7 @@ class Game:
         self.hit_sound = hit
         self.sprint_sound = sprint
         self.sprint_ready_sound = sprint_ready
-        print(f'[Game] sound_enabled={sound_enabled} hit_sound_present={self.hit_sound is not None}')
+        self._prefer_log(f'[Game] sound_enabled={sound_enabled} hit_sound_present={self.hit_sound is not None}', level='info')
 
     def run(self):
         """Main game loop with enhanced monitoring and error handling"""
@@ -367,12 +407,14 @@ class Game:
         self.game_state.game_log(f'Starting floor transition to {self.game_state.floor_number}')
 
         if self.config.seed is None:
-            gen_seed = int(time.time() * 1000)
+            from game.utils import get_seed
+            gen_seed = get_seed()
         else:
             try:
                 gen_seed = int(self.config.seed) + self.game_state.floor_number
             except Exception:
-                gen_seed = int(time.time() * 1000)
+                from game.utils import get_seed
+                gen_seed = get_seed()
 
         self.game_state.start_floor_transition(self.game_state.floor_number, gen_seed)
         # 统一记录楼层转换触发日志
@@ -425,7 +467,13 @@ class Game:
                 ent.hp -= 3
                 if ent.id is not None:
                     self.game_state.add_enemy_flash(ent.id)
-                print(f'你攻击了敌人 ({nx},{ny})，剩余HP={ent.hp} id={ent.id}')
+                # Log the attack to in-game log and persistent logger
+                try:
+                    if self.game_state:
+                        self.game_state.game_log(f'你攻击了敌人 ({nx},{ny})，剩余HP={ent.hp} id={ent.id}')
+                except Exception:
+                    pass
+                self._prefer_log(f'你攻击了敌人 ({nx},{ny})，剩余HP={ent.hp} id={ent.id}', level='info')
 
                 # Add floating text
                 self.game_state.floating_texts.append(
@@ -488,7 +536,7 @@ class Game:
 
     def _handle_debug(self):
         """Handle debug key press"""
-        print('[debug] Entities:')
+        self._prefer_log('[debug] Entities:', level='debug')
         if self.entity_mgr:
             for ent in self.entity_mgr.entities_by_id.values():
                 ex, ey = ent.x, ent.y
@@ -504,9 +552,18 @@ class Game:
                         neigh[name] = self.game_state.level[ty][tx]
                     else:
                         neigh[name] = None
-                print(
+                msg = (
                     f'  id={ent.id} pos=({ex},{ey}) hp={getattr(ent,"hp",None)} dir={getattr(ent,"dir",None)} tile={ch} neigh={neigh}'
                 )
+                if self.logger:
+                    self.logger.debug(msg, 'DEBUG')
+                elif getattr(self, 'game_state', None):
+                    try:
+                        self.game_state.game_log(msg)
+                    except Exception:
+                        print(msg)
+                else:
+                    print(msg)
 
     def _update_game_systems(self, dt):
         """Update all game systems"""
@@ -555,7 +612,13 @@ class Game:
                 if self.player.i_frames <= 0:
                     damaged = self.player.apply_damage(dmg)
                     if damaged:
-                        print(f'敌人攻击了你！ 你的HP={self.player.hp}')
+                        # Log damage to player
+                        try:
+                            if self.game_state:
+                                self.game_state.game_log(f'敌人攻击了你！ 你的HP={self.player.hp}')
+                        except Exception:
+                            pass
+                        self._prefer_log(f'敌人攻击了你！ 你的HP={self.player.hp}', level='info')
 
                         # Add floating text
                         if attacker_id is not None:
@@ -588,7 +651,8 @@ class Game:
                         play_safe(self.hit_sound)
 
                         if self.player.hp <= 0:
-                            print('你死了。游戏结束。')
+                            # Player death - log and change state
+                            self._prefer_log('你死了。游戏结束。', level='info')
                             # 不再直接退出，而是切换到游戏结束状态
                             from game.state import GameStateEnum
                             self.game_state.set_game_state(GameStateEnum.GAME_OVER)
