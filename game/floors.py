@@ -71,6 +71,16 @@ class FloorManager:
         if not any(isinstance(e, entities.Enemy) for e in entity_mgr.entities_by_id.values()):
             entity_mgr.load_from_level(level)
             entity_mgr.place_entity_near(level, self.game_state.width, self.game_state.height)
+        else:
+            # 如果全部是 basic，使用集中配置重新分配
+            try:
+                from .enemy_config import reassign_enemy_kind
+                enemy_list = [e for e in entity_mgr.entities_by_id.values() if isinstance(e, entities.Enemy)]
+                if enemy_list and all(e.kind == 'basic' for e in enemy_list):
+                    for e in enemy_list:
+                        reassign_enemy_kind(e)
+            except Exception:
+                pass
 
         # Load NPCs
         npcs = dialogs_mod.load_npcs(level, self.game_state.width, self.game_state.height)

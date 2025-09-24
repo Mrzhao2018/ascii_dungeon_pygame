@@ -304,6 +304,13 @@ class Renderer:
                     continue
 
                 ch = row[x]
+                # If this is an enemy tile, capture entity for glyph/color customization
+                ent_here_for_glyph = None
+                if ch == 'E' and entity_mgr:
+                    try:
+                        ent_here_for_glyph = entity_mgr.get_entity_at(x, y)
+                    except Exception:
+                        ent_here_for_glyph = None
 
                 # Check if FOV is enabled in config
                 if hasattr(self.config, 'enable_fov') and self.config.enable_fov:
@@ -324,7 +331,31 @@ class Renderer:
                     # FOV disabled, render all tiles normally
                     color = self._get_tile_color(ch, x, y, entity_mgr, player)
 
-                surf = self.font.render(ch, True, color)
+                # Decide glyph+color override for enemies by kind
+                render_ch = ch
+                render_color = color
+                if ch == 'E' and ent_here_for_glyph:
+                    try:
+                        kind = getattr(ent_here_for_glyph, 'kind', 'basic')
+                        glyph_map = {
+                            'basic': 'e',
+                            'guard': 'G',
+                            'scout': 's',
+                            'brute': 'B',
+                        }
+                        kind_color_map = {
+                            'basic': (220, 100, 100),
+                            'guard': (240, 160, 80),
+                            'scout': (180, 140, 240),
+                            'brute': (255, 80, 80),
+                        }
+                        render_ch = glyph_map.get(kind, 'E')
+                        # If enemy flash active, keep flash color priority
+                        if not (ent_here_for_glyph and self.game_state.enemy_flash.get(getattr(ent_here_for_glyph, 'id', None), 0) > 0):
+                            render_color = kind_color_map.get(kind, color)
+                    except Exception:
+                        render_ch = 'E'
+                surf = self.font.render(render_ch, True, render_color)
                 px = x * self.config.tile_size - self.game_state.cam_x + ox
                 py = y * self.config.tile_size - self.game_state.cam_y + oy
                 self.screen.blit(surf, (int(px), int(py)))

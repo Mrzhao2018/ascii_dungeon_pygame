@@ -99,6 +99,7 @@ def get_enemy_exp_reward(enemy_type="normal"):
         "basic": 1.0,      # 15 经验
         "guard": 1.2,      # 18 经验  
         "scout": 0.8,      # 12 经验
+        "brute": 1.6,      # 24 经验（更耐打）
         "normal": 1.0,     # 15 经验
         "strong": 1.5,     # 22 经验
         "elite": 2.0,      # 30 经验

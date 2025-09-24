@@ -197,13 +197,25 @@ def draw_player_hud(surface, player, ox, oy, view_px_w, font_path=None, tile_siz
         level_y = 8 + base_hud_size + 4 + oy  # 根据字体大小调整间距
         surface.blit(level_s, (8 + ox, level_y))
 
+        # Gold display (right under level)
+        if hasattr(player, 'gold'):
+            gold_font = small_font
+            gold_text = f'Gold: {player.gold}'
+            gold_s = gold_font.render(gold_text, True, (255, 215, 100))
+            surface.blit(gold_s, (8 + ox, level_y + base_small_size + 4))
+
+            # shift experience bar further down accordingly
+            exp_base_y_offset = base_small_size * 2 + 8
+        else:
+            exp_base_y_offset = base_small_size + 4
+
         # Experience bar (below level) - 调整尺寸和位置
         if hasattr(player, 'get_experience_info'):
             exp_info = player.get_experience_info()
             exp_bar_w = max(120, int(tile_size * 5))  # 根据tile_size调整宽度
             exp_bar_h = max(8, int(tile_size * 0.35)) # 根据tile_size调整高度
             exp_bar_x = 8 + ox
-            exp_bar_y = level_y + base_small_size + 4  # 根据字体大小调整位置
+            exp_bar_y = level_y + exp_base_y_offset  # 根据是否显示金币调整位置
             
             # Background
             pygame.draw.rect(surface, (40, 40, 40), (exp_bar_x, exp_bar_y, exp_bar_w, exp_bar_h))

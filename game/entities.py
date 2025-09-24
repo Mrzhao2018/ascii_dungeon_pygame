@@ -1,6 +1,7 @@
 import json
 import os
 from typing import Dict, List, Optional, Tuple, Any
+from .enemy_config import get_enemy_stats, get_enemy_hp
 from game.utils import set_tile
 
 class Entity:
@@ -26,19 +27,13 @@ class Enemy(Entity):
         super().__init__(x, y)
         self.kind = kind
         
-        # 敌人类型属性
-        self.enemy_stats = self._get_enemy_stats(kind)
-        
-        # 根据类型设置默认HP
-        if hp == 5:  # 如果是默认HP，则根据类型调整
-            default_hp = {
-                'basic': 5,
-                'guard': 8,
-                'scout': 3,
-                'brute': 12
-            }
-            self.hp = default_hp.get(kind, 5)
+        # 从集中配置获取属性
+        self.enemy_stats = get_enemy_stats(kind)
+        # 如果调用方传入的 hp 看起来仍是“占位默认值”(5)，使用配置中 hp
+        if hp == 5 and kind != 'basic':
+            self.hp = get_enemy_hp(kind)
         else:
+            # basic 或者明确非默认值
             self.hp = hp
             
         self.dir = tuple(dir)
@@ -53,43 +48,6 @@ class Enemy(Entity):
         self.ai_cooldown: int = 0  # AI决策冷却
         self.move_cooldown: int = 0  # 独立的移动冷却
         
-    def _get_enemy_stats(self, kind: str) -> dict:
-        """获取敌人类型的属性"""
-        stats = {
-            'basic': {
-                'chase_range': 6,
-                'patrol_range': 3,
-                'speed': 1,
-                'damage': 1,
-                'ai_update_interval': 3,  # 大幅提升反应速度
-                'move_interval': 6        # 移动间隔：快速
-            },
-            'guard': {
-                'chase_range': 8,
-                'patrol_range': 2,
-                'speed': 1,
-                'damage': 2,
-                'ai_update_interval': 2,  # 守卫反应最快
-                'move_interval': 5        # 移动间隔：很快
-            },
-            'scout': {
-                'chase_range': 10,
-                'patrol_range': 5,
-                'speed': 2,
-                'damage': 1,
-                'ai_update_interval': 1,  # 侦察兵瞬间反应
-                'move_interval': 3        # 移动间隔：极快
-            },
-            'brute': {
-                'chase_range': 4,
-                'patrol_range': 1,
-                'speed': 1,
-                'damage': 3,
-                'ai_update_interval': 4,  # 重装兵稍慢，但仍然比之前快很多
-                'move_interval': 8        # 移动间隔：较慢但仍然可以接受
-            }
-        }
-        return stats.get(kind, stats['basic'])
 
     def to_config(self) -> dict:
         c = super().to_config()
@@ -99,17 +57,8 @@ class Enemy(Entity):
     @classmethod
     def from_config(cls, cfg: dict):
         kind = cfg.get('kind', 'basic')
-        
-        # 根据类型设置默认HP
-        default_hp = {
-            'basic': 5,
-            'guard': 8,
-            'scout': 3,
-            'brute': 12
-        }
-        
-        # 如果配置中没有HP或者HP是默认值，使用类型对应的HP
-        hp = cfg.get('hp', default_hp.get(kind, 5))
+        # 统一使用集中配置获取 HP（若文件里写了自定义 hp 则尊重）
+        hp = int(cfg.get('hp', get_enemy_hp(kind)))
         
         return cls(
             int(cfg.get('x', 0)),
@@ -193,11 +142,29 @@ class EntityManager:
             del self.entities_by_id[ent.id]
 
     def load_from_level(self, level: List[str]):
-        # scan for 'E' tiles and create Enemy instances
+        """Scan for 'E' tiles and create Enemy instances with varied kinds.
+
+        为关卡中出现的每个 'E' 敌人瓦片分配一个可重复(基于坐标)的种类，避免全是 basic。
+        这样不依赖随机数种子，保证同一张地图重复加载时种类分布稳定，可用于重放与调试。
+        分布策略（按 (x*31 + y*17) % 100 的结果）：
+            0-59  -> basic  (~60%)
+            60-79 -> guard  (~20%)
+            80-94 -> scout  (~15%)
+            95-99 -> brute  (~5%)
+        """
         for y, row in enumerate(level):
             for x, ch in enumerate(row):
                 if ch == 'E':
-                    self.add(Enemy(x, y))
+                    h = (x * 31 + y * 17) % 100
+                    if h < 60:
+                        kind = 'basic'
+                    elif h < 80:
+                        kind = 'guard'
+                    elif h < 95:
+                        kind = 'scout'
+                    else:
+                        kind = 'brute'
+                    self.add(Enemy(x, y, kind=kind))
 
     def place_entity_near(self, level: List[str], WIDTH: int, HEIGHT: int, preferred=(8, 4)):
         # if no enemies, place one near preferred or first '.'
@@ -230,7 +197,17 @@ class EntityManager:
         if found:
             ex, ey = found
             set_tile(level, ex, ey, 'E')
-            self.add(Enemy(ex, ey))
+            # 使用同样的可重复分布规则来分配种类
+            h = (ex * 31 + ey * 17) % 100
+            if h < 60:
+                kind = 'basic'
+            elif h < 80:
+                kind = 'guard'
+            elif h < 95:
+                kind = 'scout'
+            else:
+                kind = 'brute'
+            self.add(Enemy(ex, ey, kind=kind))
 
     def to_config_list(self) -> List[dict]:
         return [e.to_config() for e in self.entities_by_id.values()]

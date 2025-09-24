@@ -520,9 +520,38 @@ class Game:
                             ny * self.config.tile_size - 20,
                         )
                     
+                    # 生成掉落并应用
+                    try:
+                        from game.loot import generate_loot_for_enemy, ITEM_DISPLAY_NAME
+                        drops = generate_loot_for_enemy(ent)
+                    except Exception:
+                        drops = []
+                    if drops:
+                        from game.ui import add_floating_text
+                        for item_key, qty in drops:
+                            # 应用到玩家
+                            try:
+                                self.player.apply_loot(item_key, qty)
+                            except Exception:
+                                pass
+                            name = ITEM_DISPLAY_NAME.get(item_key, item_key)
+                            add_floating_text(
+                                self.game_state,
+                                f'+{qty} {name}',
+                                0,
+                                0,
+                                time_ms=1200,
+                                last_pos=(nx * self.config.tile_size, ny * self.config.tile_size - 10),
+                                experience=False,
+                            )
+
                     # 记录击败敌人（用于调试和统计）
                     if self.logger:
-                        self.logger.info(f"击败敌人 {enemy_type}, 获得 {exp_reward} 经验, 当前等级: {self.player.level}", "COMBAT")
+                        loot_summary = ', '.join(f'{k}x{v}' for k, v in drops) if drops else 'no loot'
+                        self.logger.info(
+                            f"击败敌人 {enemy_type}, 经验 +{exp_reward}, 掉落: {loot_summary}, 等级: {self.player.level}",
+                            "COMBAT",
+                        )
                     
                     # Remove entity
                     if self.entity_mgr:

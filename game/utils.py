@@ -425,8 +425,24 @@ def generate_dungeon(
             # avoid player/target tile
             if grid[ey][ex] in ('@', 'X'):
                 continue
+            # Use centralized enemy config (deterministic by coordinate)
+            try:
+                from .enemy_config import pick_enemy_kind_for_coord, get_enemy_hp
+                kind = pick_enemy_kind_for_coord(ex, ey)
+                hp_default = get_enemy_hp(kind)
+            except Exception:
+                kind = 'basic'
+                hp_default = 5
             grid[ey][ex] = 'E'
-            placed.append({'id': next_id, 'type': 'Enemy', 'x': ex, 'y': ey, 'hp': 5, 'dir': [1, 0], 'kind': 'basic'})
+            placed.append({
+                'id': next_id,
+                'type': 'Enemy',
+                'x': ex,
+                'y': ey,
+                'hp': hp_default,
+                'dir': [1, 0],
+                'kind': kind
+            })
             next_id += 1
 
     # persist enemy placements to data/enemies.json so subsequent runs can load them

@@ -172,3 +172,54 @@
 [17478] Generating floor 2 with seed 12347, size 80x30
 [17491] Wrote floor snapshot: e:\pygame\game\..\data\debug\maps\last_level_floor_2.txt
 [17492] Wrote post-entity floor snapshot: e:\pygame\game\..\data\debug\maps\last_level_floor_2_after_entities.txt
+[9679] Generating floor 2 with seed 12347, size 80x30
+[9695] Wrote floor snapshot: e:\pygame\game\..\data\debug\maps\last_level_floor_2.txt
+[9696] Wrote post-entity floor snapshot: e:\pygame\game\..\data\debug\maps\last_level_floor_2_after_entities.txt
+[17286] Generating floor 3 with seed 12348, size 80x30
+[17298] Wrote floor snapshot: e:\pygame\game\..\data\debug\maps\last_level_floor_3.txt
+[17299] Wrote post-entity floor snapshot: e:\pygame\game\..\data\debug\maps\last_level_floor_3_after_entities.txt
+[33355] Generating floor 4 with seed 12349, size 80x30
+[33378] Wrote floor snapshot: e:\pygame\game\..\data\debug\maps\last_level_floor_4.txt
+[33379] Wrote post-entity floor snapshot: e:\pygame\game\..\data\debug\maps\last_level_floor_4_after_entities.txt
+[39028] Generating floor 5 with seed 12350, size 80x30
+[39041] Wrote floor snapshot: e:\pygame\game\..\data\debug\maps\last_level_floor_5.txt
+[39041] Wrote post-entity floor snapshot: e:\pygame\game\..\data\debug\maps\last_level_floor_5_after_entities.txt
+[17185] Generating floor 2 with seed 12347, size 80x30
+[17197] Wrote floor snapshot: e:\pygame\game\..\data\debug\maps\last_level_floor_2.txt
+[17198] Wrote post-entity floor snapshot: e:\pygame\game\..\data\debug\maps\last_level_floor_2_after_entities.txt
+[24896] Generating floor 3 with seed 12348, size 80x30
+[24908] Wrote floor snapshot: e:\pygame\game\..\data\debug\maps\last_level_floor_3.txt
+[24909] Wrote post-entity floor snapshot: e:\pygame\game\..\data\debug\maps\last_level_floor_3_after_entities.txt
+[44853] Generating floor 4 with seed 12349, size 80x30
+[44866] Wrote floor snapshot: e:\pygame\game\..\data\debug\maps\last_level_floor_4.txt
+[44867] Wrote post-entity floor snapshot: e:\pygame\game\..\data\debug\maps\last_level_floor_4_after_entities.txt
+[53678] Generating floor 5 with seed 12350, size 80x30
+[53690] Wrote floor snapshot: e:\pygame\game\..\data\debug\maps\last_level_floor_5.txt
+[53691] Wrote post-entity floor snapshot: e:\pygame\game\..\data\debug\maps\last_level_floor_5_after_entities.txt
+[33029] Generating floor 2 with seed 12347, size 80x30
+[33043] Wrote floor snapshot: e:\pygame\game\..\data\debug\maps\last_level_floor_2.txt
+[33043] Wrote post-entity floor snapshot: e:\pygame\game\..\data\debug\maps\last_level_floor_2_after_entities.txt
+[38876] Generating floor 3 with seed 12348, size 80x30
+[38892] Wrote floor snapshot: e:\pygame\game\..\data\debug\maps\last_level_floor_3.txt
+[38892] Wrote post-entity floor snapshot: e:\pygame\game\..\data\debug\maps\last_level_floor_3_after_entities.txt
+[22893] Generating floor 2 with seed 12347, size 80x30
+[22905] Wrote floor snapshot: e:\pygame\game\..\data\debug\maps\last_level_floor_2.txt
+[22906] Wrote post-entity floor snapshot: e:\pygame\game\..\data\debug\maps\last_level_floor_2_after_entities.txt
+[32829] Generating floor 3 with seed 12348, size 80x30
+[32842] Wrote floor snapshot: e:\pygame\game\..\data\debug\maps\last_level_floor_3.txt
+[32843] Wrote post-entity floor snapshot: e:\pygame\game\..\data\debug\maps\last_level_floor_3_after_entities.txt
+[38500] Generating floor 4 with seed 12349, size 80x30
+[38511] Wrote floor snapshot: e:\pygame\game\..\data\debug\maps\last_level_floor_4.txt
+[38512] Wrote post-entity floor snapshot: e:\pygame\game\..\data\debug\maps\last_level_floor_4_after_entities.txt
+[50420] Generating floor 5 with seed 12350, size 80x30
+[50432] Wrote floor snapshot: e:\pygame\game\..\data\debug\maps\last_level_floor_5.txt
+[50432] Wrote post-entity floor snapshot: e:\pygame\game\..\data\debug\maps\last_level_floor_5_after_entities.txt
+[58372] Generating floor 6 with seed 12351, size 80x30
+[58384] Wrote floor snapshot: e:\pygame\game\..\data\debug\maps\last_level_floor_6.txt
+[58385] Wrote post-entity floor snapshot: e:\pygame\game\..\data\debug\maps\last_level_floor_6_after_entities.txt
+[62788] Generating floor 7 with seed 12352, size 80x30
+[62802] Wrote floor snapshot: e:\pygame\game\..\data\debug\maps\last_level_floor_7.txt
+[62802] Wrote post-entity floor snapshot: e:\pygame\game\..\data\debug\maps\last_level_floor_7_after_entities.txt
+[14286] Generating floor 2 with seed 12347, size 80x30
+[14299] Wrote floor snapshot: e:\pygame\game\..\data\debug\maps\last_level_floor_2.txt
+[14300] Wrote post-entity floor snapshot: e:\pygame\game\..\data\debug\maps\last_level_floor_2_after_entities.txt

@@ -77,6 +77,13 @@ class Player:
         # 升级提示
         self.level_up_notification = None
         self.level_up_timer = 0
+        # 货币 / 掉落统计 (needs to be inside __init__)
+        self.gold = 0
+        self.loot_stats = {
+            'stamina_shard': 0,
+            'speed_fragment': 0,
+            'hp_fragment': 0
+        }
 
     @property
     def move_cooldown_timer(self):
@@ -388,6 +395,35 @@ class Player:
     def get_level_bonuses_info(self):
         """获取当前等级的属性加成信息"""
         return get_level_bonuses(self.level)
+
+    # -----------------
+    # 掉落效果应用
+    # -----------------
+    def apply_loot(self, item_key: str, qty: int = 1):
+        """Apply loot effect to player (simple incremental system).
+
+        gold: 加到 gold
+        stamina_shard: 永久基础体力 +1 (并刷新加成)
+        speed_fragment: 永久移动冷却基础值减少 2ms (下限 40)
+        hp_fragment: 永久基础生命 +1
+        """
+        if qty <= 0:
+            return
+        if item_key == 'gold':
+            self.gold += qty
+        elif item_key == 'stamina_shard':
+            self.loot_stats['stamina_shard'] += qty
+            self.base_max_stamina += qty
+            self._apply_level_bonuses()
+        elif item_key == 'speed_fragment':
+            self.loot_stats['speed_fragment'] += qty
+            self.base_move_cooldown = max(40, self.base_move_cooldown - 2 * qty)
+            self._apply_level_bonuses()
+        elif item_key == 'hp_fragment':
+            self.loot_stats['hp_fragment'] += qty
+            self.base_hp += qty
+            self._apply_level_bonuses()
+        # 其他潜在道具在此扩展
 
     def reset_experience(self):
         """重置经验和等级（用于重新开始游戏）"""
