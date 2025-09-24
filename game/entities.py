@@ -1,7 +1,8 @@
 import json
 import os
 from typing import Dict, List, Optional, Tuple, Any
-from .enemy_config import get_enemy_stats, get_enemy_hp
+from .enemy_config import get_enemy_stats, get_enemy_hp, pick_enemy_kind_for_coord
+from .log_utils import safe_log
 from game.utils import set_tile
 
 class Entity:
@@ -81,40 +82,7 @@ class EntityManager:
         self.game_state = None
 
     def _prefer_log(self, msg: str, level: str = 'debug'):
-        try:
-            if getattr(self, 'logger', None):
-                try:
-                    if level == 'debug' and hasattr(self.logger, 'debug'):
-                        self.logger.debug(msg, 'ENTITY')
-                        return
-                    if level == 'info' and hasattr(self.logger, 'info'):
-                        self.logger.info(msg, 'ENTITY')
-                        return
-                    if level == 'warning' and hasattr(self.logger, 'warning'):
-                        self.logger.warning(msg, 'ENTITY')
-                        return
-                    if level == 'error' and hasattr(self.logger, 'error'):
-                        self.logger.error(msg, 'ENTITY')
-                        return
-                except Exception:
-                    pass
-
-            if getattr(self, 'game_state', None) and hasattr(self.game_state, 'game_log'):
-                try:
-                    self.game_state.game_log(msg)
-                    return
-                except Exception:
-                    pass
-
-            try:
-                print(msg)
-            except Exception:
-                pass
-        except Exception:
-            try:
-                print(msg)
-            except Exception:
-                pass
+        safe_log(getattr(self, 'logger', None), getattr(self, 'game_state', None), msg, level=level, channel='ENTITY')
 
     def add(self, ent: Entity):
         if getattr(ent, 'id', None) is None:
@@ -142,28 +110,15 @@ class EntityManager:
             del self.entities_by_id[ent.id]
 
     def load_from_level(self, level: List[str]):
-        """Scan for 'E' tiles and create Enemy instances with varied kinds.
+        """Scan for 'E' tiles and create Enemy instances using centralized config.
 
-        为关卡中出现的每个 'E' 敌人瓦片分配一个可重复(基于坐标)的种类，避免全是 basic。
-        这样不依赖随机数种子，保证同一张地图重复加载时种类分布稳定，可用于重放与调试。
-        分布策略（按 (x*31 + y*17) % 100 的结果）：
-            0-59  -> basic  (~60%)
-            60-79 -> guard  (~20%)
-            80-94 -> scout  (~15%)
-            95-99 -> brute  (~5%)
+        去除本地硬编码：种类选择委托给 enemy_config.pick_enemy_kind_for_coord，
+        保证与地图生成阶段 & 其它使用位置的逻辑一致，单一来源。
         """
         for y, row in enumerate(level):
             for x, ch in enumerate(row):
                 if ch == 'E':
-                    h = (x * 31 + y * 17) % 100
-                    if h < 60:
-                        kind = 'basic'
-                    elif h < 80:
-                        kind = 'guard'
-                    elif h < 95:
-                        kind = 'scout'
-                    else:
-                        kind = 'brute'
+                    kind = pick_enemy_kind_for_coord(x, y)
                     self.add(Enemy(x, y, kind=kind))
 
     def place_entity_near(self, level: List[str], WIDTH: int, HEIGHT: int, preferred=(8, 4)):
@@ -197,16 +152,8 @@ class EntityManager:
         if found:
             ex, ey = found
             set_tile(level, ex, ey, 'E')
-            # 使用同样的可重复分布规则来分配种类
-            h = (ex * 31 + ey * 17) % 100
-            if h < 60:
-                kind = 'basic'
-            elif h < 80:
-                kind = 'guard'
-            elif h < 95:
-                kind = 'scout'
-            else:
-                kind = 'brute'
+            # 使用集中配置的分配函数
+            kind = pick_enemy_kind_for_coord(ex, ey)
             self.add(Enemy(ex, ey, kind=kind))
 
     def to_config_list(self) -> List[dict]:

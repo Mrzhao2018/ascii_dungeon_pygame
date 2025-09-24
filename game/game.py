@@ -2,6 +2,7 @@ import sys
 import pygame
 import time
 from typing import Optional, Dict, List, cast
+from .log_utils import safe_log
 from game.config import GameConfig
 from game.state import GameState
 from game.input import InputHandler
@@ -109,43 +110,7 @@ class Game:
             raise
 
     def _prefer_log(self, msg: str, level: str = 'info') -> None:
-        """Prefer the persistent logger, then in-game game_log, then console print as last resort."""
-        try:
-            if getattr(self, 'logger', None):
-                try:
-                    if level == 'debug' and hasattr(self.logger, 'debug'):
-                        self.logger.debug(msg, 'GAME')
-                        return
-                    if level == 'warning' and hasattr(self.logger, 'warning'):
-                        self.logger.warning(msg, 'GAME')
-                        return
-                    if level == 'error' and hasattr(self.logger, 'error'):
-                        self.logger.error(msg, 'GAME')
-                        return
-                    # default to info
-                    if hasattr(self.logger, 'info'):
-                        self.logger.info(msg, 'GAME')
-                        return
-                except Exception:
-                    pass
-
-            if getattr(self, 'game_state', None) and hasattr(self.game_state, 'game_log'):
-                try:
-                    self.game_state.game_log(msg)
-                    return
-                except Exception:
-                    pass
-
-            # Fallback to printing to console
-            try:
-                print(msg)
-            except Exception:
-                pass
-        except Exception:
-            try:
-                print(msg)
-            except Exception:
-                pass
+        safe_log(getattr(self, 'logger', None), getattr(self, 'game_state', None), msg, level=level, channel='GAME')
 
     def _initialize_game_world(self):
         """Initialize the game world (level, player, etc.) via session controller."""
@@ -711,14 +676,6 @@ class Game:
             # 统一记录楼层转换完成摘要
             log_transition_summary(self.logger, self.game_state, self.entity_mgr)
 
-    def _handle_debug_mode_toggle(self):
-        """Deprecated: kept for compatibility; use debug_controls.toggle_debug_mode instead."""
-        toggle_debug_mode(self.config, self.renderer, self.logger, self.game_state)
-
-    def _handle_debug_panel_toggle(self, panel_name):
-        """Deprecated: kept for compatibility; use debug_controls.toggle_panel instead."""
-        toggle_panel(self.renderer, panel_name, self.logger, self.game_state, self.config)
-
     def _handle_restart_game(self):
         """处理游戏重新开始"""
         try:
@@ -754,13 +711,6 @@ class Game:
             
         except Exception as e:
             self.logger.error("开始游戏失败", "GAME", e)
-
-    def _restart_game(self):
-        """Deprecated: use session_controller.restart_game instead."""
-        self.game_state, self.player, self.entity_mgr, self.npcs = session_restart_game(
-            self.config, self.logger, self.floor_manager, self.renderer, self.game_state
-        )
-        self.logger.info("游戏重新开始完成", "GAME")
 
     def _handle_pause_game(self):
         """处理暂停游戏"""

@@ -2,6 +2,7 @@ import os
 import time
 from typing import List, Optional, Tuple
 from game import utils, entities, dialogs as dialogs_mod
+from .log_utils import safe_log
 
 """
 Floor management and generation
@@ -17,19 +18,7 @@ class FloorManager:
         self.game_state = game_state
 
     def _prefer_log(self, msg: str, level: str = 'info'):
-        try:
-            if getattr(self, 'game_state', None) and hasattr(self.game_state, 'game_log'):
-                try:
-                    self.game_state.game_log(msg)
-                    return
-                except Exception:
-                    pass
-        except Exception:
-            pass
-        try:
-            print(msg)
-        except Exception:
-            pass
+        safe_log(getattr(self, 'logger', None), getattr(self, 'game_state', None), msg, level=level, channel='FLOOR')
 
     def generate_initial_level(self) -> List[str]:
         """Generate the initial level based on configuration"""

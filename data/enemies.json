@@ -1,0 +1,64 @@
+{
+  "entities": [
+    {
+      "id": 1,
+      "type": "Enemy",
+      "x": 11,
+      "y": 17,
+      "hp": 5,
+      "dir": [
+        1,
+        0
+      ],
+      "kind": "basic"
+    },
+    {
+      "id": 2,
+      "type": "Enemy",
+      "x": 19,
+      "y": 7,
+      "hp": 5,
+      "dir": [
+        1,
+        0
+      ],
+      "kind": "basic"
+    },
+    {
+      "id": 3,
+      "type": "Enemy",
+      "x": 55,
+      "y": 20,
+      "hp": 5,
+      "dir": [
+        1,
+        0
+      ],
+      "kind": "basic"
+    },
+    {
+      "id": 4,
+      "type": "Enemy",
+      "x": 11,
+      "y": 16,
+      "hp": 5,
+      "dir": [
+        1,
+        0
+      ],
+      "kind": "basic"
+    },
+    {
+      "id": 5,
+      "type": "Enemy",
+      "x": 22,
+      "y": 20,
+      "hp": 5,
+      "dir": [
+        1,
+        0
+      ],
+      "kind": "basic"
+    }
+  ]
+}

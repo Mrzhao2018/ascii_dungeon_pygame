@@ -313,28 +313,30 @@ class Renderer:
                         ent_here_for_glyph = None
 
                 # Check if FOV is enabled in config
+                visibility = None
                 if hasattr(self.config, 'enable_fov') and self.config.enable_fov:
-                    # 获取瓦片可见性状态
                     visibility = TileVisibility.get_visibility_state(x, y, player.fov_system)
-
-                    # 根据可见性状态决定是否渲染和如何渲染
                     if visibility == TileVisibility.HIDDEN:
-                        # 完全不可见，不渲染
+                        # 未探索直接跳过
                         continue
-                    elif visibility == TileVisibility.EXPLORED:
-                        # 已探索但不可见，用暗色渲染
-                        color = self._get_explored_tile_color(ch, x, y, entity_mgr, player)
+                    if visibility == TileVisibility.EXPLORED:
+                        # 对于雾中的敌人：不显示敌人本身，只显示地面（避免“敌人离开视野仍可见”）
+                        ch_for_render = ch
+                        if ch == 'E':
+                            ch_for_render = '.'  # 显示成已探索地面
+                        color = self._get_explored_tile_color(ch_for_render, x, y, entity_mgr, player)
+                        # 覆盖 ch 供后续 glyph 渲染使用（保持与颜色一致）
+                        ch = ch_for_render
                     else:  # VISIBLE
-                        # 当前可见，正常渲染
                         color = self._get_tile_color(ch, x, y, entity_mgr, player)
                 else:
-                    # FOV disabled, render all tiles normally
                     color = self._get_tile_color(ch, x, y, entity_mgr, player)
 
                 # Decide glyph+color override for enemies by kind
                 render_ch = ch
                 render_color = color
-                if ch == 'E' and ent_here_for_glyph:
+                # 仅在敌人当前可见时才渲染其种类特殊外观（EXPLORED 状态下已转成 floor）
+                if ch == 'E' and ent_here_for_glyph and (visibility is None or visibility == TileVisibility.VISIBLE):
                     try:
                         kind = getattr(ent_here_for_glyph, 'kind', 'basic')
                         glyph_map = {
